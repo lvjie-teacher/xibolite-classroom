@@ -832,7 +832,7 @@ async function refreshWall(){
     // 1. 优先从服务器获取（跨设备共享的关键）
     if(serverMode){
         try{
-            const r=await fetch('/api/results',{signal:AbortSignal.timeout(5000)});
+            const r=await fetch('/api/results?_t='+Date.now(),{signal:AbortSignal.timeout(5000)});
             if(r.ok){
                 results=await r.json();
                 serverReachable=true;
@@ -862,8 +862,8 @@ async function refreshWall(){
     }
 }
 
-// 自动刷新：每10秒从服务器拉取最新成果（服务器模式）
-setInterval(()=>{if(currentGroup&&serverMode)refreshWall();},10000);
+// 自动刷新：每10秒从服务器拉取最新成果（仅检测serverMode，不依赖currentGroup）
+setInterval(()=>{if(serverMode)refreshWall();},10000);
 
 function renderAchievementWall(results){
     const body=document.getElementById('achievementBody');const entries=Object.entries(results);
@@ -894,7 +894,7 @@ function openViewerFromWall(gid,idx){let r=cachedResults[gid];if(!r)try{r=JSON.p
 // ============ 展示模式 ============
 function presentGroup(){const data=collectData();const g=GROUPS[currentGroup];if(!(data.feature||data.west||data.east||data.conclusion||data.images.length>0)){showNotification('请先完成任务内容再展示');return;}presGroups=[{...data,group_key:currentGroup,group_icon:g.icon,group_name:g.name,group_num:currentGroupNum,color:g.color}];presGroupIdx=0;enterPresentation();}
 async function presentAll(){
-    let results={};if(serverMode){try{const r=await fetch('/api/results');results=await r.json();}catch(e){}}
+    let results={};if(serverMode){try{const r=await fetch('/api/results?_t='+Date.now());results=await r.json();}catch(e){}}
     for(const k in sessionResults)results[k]=sessionResults[k];
     try{const l=JSON.parse(localStorage.getItem('classResults')||'{}');for(const k in l)if(!results[k])results[k]=l[k];}catch(e){}
     const vals=Object.values(results);const g=GROUPS[currentGroup];
