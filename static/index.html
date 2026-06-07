@@ -312,6 +312,8 @@
                 <span class="pres-counter" id="presGroupCounter">1/1</span>
                 <span style="color:rgba(255,255,255,0.3);margin:0 4px;">|</span>
                 <button id="presDrawToggle" onclick="togglePresDraw()">✏️ 画笔</button>
+                <span style="color:rgba(255,255,255,0.3);margin:0 4px;">|</span>
+                <button onclick="presAddImage()">➕ 添加图片</button>
             </div>
             <div class="pres-toolbar-right">
                 <button onclick="presZoomIn()">➕</button>
@@ -677,6 +679,7 @@ async function confirmImageLibrary(){
     saveDraft();
     closeImageLibrary();
     showNotification(`✅ 已从图片库添加 ${added} 张图片！`);
+    if(window._presAddImageMode){window._presAddImageMode=false;setTimeout(()=>{presentGroup();},500);}
 }
 
 // ============ 清空数据 ============
@@ -1043,6 +1046,7 @@ function presGroupPrev(){if(presGroupIdx>0){presGroupIdx--;presImgIdx=0;presZoom
 function presGroupNext(){if(presGroupIdx<presGroups.length-1){presGroupIdx++;presImgIdx=0;presZoom=1;renderPresSlide();}}
 function presJumpToGroup(idx){idx=parseInt(idx);if(idx>=0&&idx<presGroups.length){presGroupIdx=idx;presImgIdx=0;presZoom=1;renderPresSlide();}}
 function closePresentation(){document.getElementById('presOverlay').classList.remove('active');presDrawing=false;try{document.exitFullscreen?.();}catch(e){}}
+function presAddImage(){closePresentation();window._presAddImageMode=true;setTimeout(()=>{openImageLibrary();},300);}
 
 // ============ 草稿 ============
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
