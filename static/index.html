@@ -273,8 +273,12 @@
             <!-- 返回课堂按钮：如果有已保存的课堂状态就显示 -->
             <div id="returnClassBar" style="display:none;">
                 <span class="rc-icon">📋</span>
-                <div style="font-size:14px;color:#2e7d32;font-weight:700;margin-bottom:6px;">检测到你正在上课中</div>
-                <button onclick="resumeClass()" style="background:#2e7d32;color:white;border:none;padding:10px 24px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">🏠 返回课堂</button>
+                <div style="font-size:13px;color:#2e7d32;margin-bottom:2px;">你之前在上课：</div>
+                <div class="rc-label" style="font-size:16px;color:#1a237e;font-weight:700;margin-bottom:8px;"></div>
+                <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+                    <button onclick="resumeClass()" style="background:#2e7d32;color:white;border:none;padding:10px 24px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">🏠 返回课堂</button>
+                    <button onclick="resetAndChooseNew()" style="background:#f5f5f5;color:#666;border:1px solid #ddd;padding:10px 18px;border-radius:10px;font-size:14px;cursor:pointer;">🔄 换一个小组</button>
+                </div>
             </div>
             <div class="gs-decor"><span class="gs-decor-line"></span><span style="font-size:28px;">🚂</span><span class="gs-decor-line"></span></div>
             <h2>透过西伯利亚大铁路看俄罗斯</h2>
@@ -446,19 +450,19 @@ window.addEventListener('DOMContentLoaded',()=>{
             selectGroup(d.group);
             document.getElementById('groupNumber').value=d.num||1;
             if(d.entered===true){
-                // ★ 自动恢复课堂状态，不再显示小组选择界面
-                currentGroup=d.group;
-                currentGroupNum=d.num||1;
-                document.getElementById('groupSelectOverlay').classList.add('hidden');
-                const fb=document.getElementById('floatingBackBtn');if(fb)fb.style.display='flex';
-                renderMainApp();
-                restoreDraft();
-                updateServerStatus();
-                return; // ★ 跳过后续手动选择逻辑
+                // ★ 始终显示小组选择界面，但显示醒目的"返回课堂"按钮
+                const bar=document.getElementById('returnClassBar');
+                if(bar){
+                    bar.style.display='block';
+                    const g=GROUPS[d.group];
+                    const label=bar.querySelector('.rc-label');
+                    if(label&&g)label.textContent=`${g.icon} ${g.name} · 第${d.num||1}组`;
+                }
             }
         }
     }catch(e){}
-    // 即使没有 entered 状态，也显示返回课堂按钮（兼容旧格式）
+    // ★ 始终显示小组选择界面，让扫码进来的新用户也能选组
+    document.getElementById('groupSelectOverlay').classList.remove('hidden');
 });
 
 // 离开页面时自动保存草稿
@@ -521,6 +525,7 @@ function enterApp(){
 }
 function switchGroup(){document.getElementById('groupSelectOverlay').classList.remove('hidden');const bar=document.getElementById('returnClassBar');if(bar){const s=localStorage.getItem('selectedGroup');if(s)try{const d=JSON.parse(s);if(d.entered===true)bar.style.display='block';}catch(e){}} const fb=document.getElementById('floatingBackBtn');if(fb)fb.style.display='none';}
 function resumeClass(){const s=localStorage.getItem('selectedGroup');if(!s)return;try{const d=JSON.parse(s);if(d.group){currentGroup=d.group;currentGroupNum=d.num||1;document.getElementById('groupSelectOverlay').classList.add('hidden');const fb=document.getElementById('floatingBackBtn');if(fb)fb.style.display='flex';renderMainApp();restoreDraft();updateServerStatus();showNotification('✅ 已返回课堂');window.scrollTo({top:0,behavior:'smooth'});}}catch(e){}}
+function resetAndChooseNew(){const s=localStorage.getItem('selectedGroup');if(s)try{const d=JSON.parse(s);d.entered=false;localStorage.setItem('selectedGroup',JSON.stringify(d));}catch(e){}document.getElementById('returnClassBar').style.display='none';showNotification('🔄 请重新选择小组');}
 
 // ============ 渲染主界面 ============
 function renderMainApp(){
