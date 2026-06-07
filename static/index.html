@@ -71,8 +71,8 @@
         .uploaded-thumbs img { height: 80px; object-fit: cover; border-radius: 6px; border: 2px solid #c5cae9; cursor: pointer; }
         .thumb-delete-btn { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; background: #ff5252; color: white; border: none; border-radius: 50%; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; padding: 0; }
         .thumb-delete-btn:hover { background: #d32f2f; transform: scale(1.15); }
-        .upload-buttons { display: flex; gap: 10px; margin-bottom: 16px; }
-        .upload-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border: 1px solid #c5cae9; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; color: #1a237e; }
+        .upload-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        .upload-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border: 1px solid #c5cae9; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; color: #1a237e; }
         .upload-btn:hover { background: #e8eaf6; }
         .upload-btn .btn-icon { font-size: 18px; }
 
@@ -389,7 +389,7 @@ const GROUPS = {
             '先找出主要的<strong>地形区</strong>，分析地形类型有<strong>多少种</strong>，是<strong>多样还是单一</strong>',
             '判断<strong>以什么地形为主</strong>（平原/高原/山地/盆地…）',
             '看这些地形的<strong>分布特征</strong>，根据分布判断<strong>地势高低</strong>——哪边高、哪边低',
-            '最后分析<strong>地势起伏的大小</strong>（起伏大/小？原因是什么？）'
+            '最后分析<strong>地势起伏的大小</strong>（起伏大/小？）'
         ]}
     },
     climate: { id:'climate', name:'气候组', icon:'🌡️', gradient:'linear-gradient(135deg,#e65100,#ff6d00)', color:'#e65100', keyword:'西伯利亚 气候 寒冷 冻土',
@@ -408,8 +408,8 @@ const GROUPS = {
         analysisGuide:{ cls:'river', title:'🌊 分析河湖特征的一般方法', steps:[
             '整体看河流湖泊<strong>数量多少</strong>（多/少），是否<strong>分布均匀</strong>；若不均匀，<strong>哪里集中</strong>',
             '找出几条<strong>代表性河流</strong>（如鄂毕河、叶尼塞河、勒拿河）',
-            '分析河流<strong>流程长短</strong>、<strong>流向</strong>、<strong>流速</strong>',
-            '分析河流<strong>流量及季节变化</strong>、<strong>结冰期</strong>（长短？有无？）、<strong>航运价值</strong>（高/低？说明原因）'
+            '分析河流<strong>流程长短</strong>、<strong>流向</strong>、<strong>流速</strong>、<strong>流量及季节变化</strong>、<strong>结冰期</strong>（长短？有无？）',
+            '分析河流<strong>航运价值</strong>（高/低？说明原因）'
         ]}
     },
 };
