@@ -265,6 +265,12 @@
 
         @media (min-width: 768px) { .main-content { max-width: 720px; margin: 0 auto; } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* 展示模式全屏查看图片库图片 */
+        .pres-overlay.libview .pres-right { display: none !important; }
+        .pres-overlay.libview .pres-left { flex: 1 !important; max-width: 100% !important; }
+        .pres-overlay.libview .pres-img-nav { display: none !important; }
+        #presBackBtn { display: none; }
+        .pres-overlay.libview #presBackBtn { display: inline-block !important; }
     </style>
 </head>
 <body>
@@ -319,6 +325,7 @@
                 <button id="presDrawToggle" onclick="togglePresDraw()">✏️ 画笔</button>
                 <span style="color:rgba(255,255,255,0.3);margin:0 4px;">|</span>
                 <button onclick="presViewImages()">📷 查看图片库</button>
+                <button id="presBackBtn" onclick="presCloseLibImageView()" style="background:rgba(255,152,0,0.5);">🔙 返回</button>
             </div>
             <div class="pres-toolbar-right">
                 <button onclick="presZoomIn()">➕</button>
@@ -425,6 +432,7 @@ let currentGroup=null, currentGroupNum=1, uploadedImages=[], imageUrls=[];
 let viewerImages=[], viewerIndex=0, zoomLevel=1;
 let serverMode=false, cachedResults={}, sessionResults={};
 let presGroups=[], presGroupIdx=0, presImgIdx=0, presZoom=1;
+let presViewingLibImg=false; let cachedLibraryImages=null;
 let selectedGroup=null;
 // imageUrls[i] 存储已上传到服务器的URL，与 uploadedImages 一一对应
 // uploadedImages[i] 用于本地显示（base64或服务器URL），imageUrls[i] 用于提交给服务器
@@ -631,6 +639,14 @@ async function openImageLibrary(readOnly){
         if(footer){ footer.style.display = ''; }
         document.getElementById('imageLibraryOverlay').classList.remove('readonly');
     }
+    // 使用缓存（预加载或上次已获取）
+    if(cachedLibraryImages !== null){
+        selectedLibraryIdx=[];
+        updateIlCount();
+        libraryImages = cachedLibraryImages;
+        renderImageLibrary();
+        return;
+    }
     document.getElementById('ilGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:#999;">⏳ 加载中...</div>';
     selectedLibraryIdx=[];
     updateIlCount();
@@ -638,6 +654,7 @@ async function openImageLibrary(readOnly){
         const r=await fetch('/api/image_library');
         const d=await r.json();
         libraryImages=d.images||[];
+        cachedLibraryImages = libraryImages;
         renderImageLibrary();
     }catch(e){
         document.getElementById('ilGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:#c62828;">❌ 加载失败，请检查网络</div>';
@@ -665,7 +682,13 @@ function renderImageLibrary(){
     }).join('');
 }
 function toggleLibraryImage(idx){
-    if(window._ilReadOnly) return; // 只读模式不允许选中
+    if(window._ilReadOnly){
+        // 只读模式：在展示区全屏显示该图片，支持画笔勾画
+        if(libraryImages && libraryImages[idx]){
+            presShowLibImage(libraryImages[idx].url);
+        }
+        return;
+    }
     const pos=selectedLibraryIdx.indexOf(idx);
     if(pos>=0)selectedLibraryIdx.splice(pos,1);
     else selectedLibraryIdx.push(idx);
@@ -1075,6 +1098,44 @@ function presViewImages(){
     openImageLibrary(true);
 }
 
+// ============ 展示区全屏查看图片库图片 ============
+function presShowLibImage(imgUrl){
+    presViewingLibImg=true;
+    document.getElementById('presOverlay').classList.add('libview');
+    closeImageLibrary();
+    document.getElementById('presRight').style.display='none';
+    const imgEl=document.getElementById('presImage');
+    imgEl.src=imgUrl;
+    imgEl.style.display='block';
+    presZoom=1; imgEl.style.transform='scale(1)';
+    document.getElementById('presImgNav').style.display='none';
+    presDrawing=true;
+    initPresCanvas();
+    const canvas=document.getElementById('presCanvas');
+    if(canvas)canvas.classList.add('drawing');
+    document.getElementById('presDrawBar').classList.add('active');
+    document.getElementById('presDrawToggle').classList.add('active-tool');
+    bindPresCanvasEvents();
+    showNotification('📷 图片已全屏展示，可使用画笔勾画');
+}
+function presCloseLibImageView(){
+    presViewingLibImg=false;
+    document.getElementById('presOverlay').classList.remove('libview');
+    document.getElementById('presRight').style.display='';
+    document.getElementById('presImgNav').style.display='flex';
+    presDrawing=false;
+    const canvas=document.getElementById('presCanvas');
+    if(canvas){
+        canvas.classList.remove('drawing');
+        const ctx=canvas.getContext('2d');
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+    }
+    document.getElementById('presDrawBar').classList.remove('active');
+    document.getElementById('presDrawToggle').classList.remove('active-tool');
+    renderPresSlide();
+    showNotification('✅ 已返回展示模式');
+}
+
 // ============ 草稿 ============
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
 let _saveTimer=null;
@@ -1087,6 +1148,14 @@ setInterval(()=>{if(currentGroup)saveDraft();},30000);
 // ============ 工具 ============
 function closeApp(){if(!confirm('确定要退出吗？'))return;const s=localStorage.getItem('selectedGroup');if(s)try{const d=JSON.parse(s);d.entered=false;localStorage.setItem('selectedGroup',JSON.stringify(d));}catch(e){}document.getElementById('groupSelectOverlay').classList.remove('hidden');const fb=document.getElementById('floatingBackBtn');if(fb)fb.style.display='none';showNotification('已退出课堂');}
 function showNotification(msg){const o=document.querySelector('.ntoast');if(o)o.remove();const t=document.createElement('div');t.className='ntoast';t.textContent=msg;t.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:white;padding:10px 24px;border-radius:24px;font-size:14px;z-index:1000;max-width:90%;text-align:center;animation:fadeIn 0.3s ease-out;';document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}
+// 预加载图片库列表（页面加载后 2 秒开始，不阻塞 UI）
+setTimeout(() => {
+    if(cachedLibraryImages !== null) return;
+    fetch('/api/image_library')
+        .then(r => r.json())
+        .then(d => { cachedLibraryImages = d.images || []; })
+        .catch(() => {});
+}, 2000);
 </script>
 </body>
 </html>
