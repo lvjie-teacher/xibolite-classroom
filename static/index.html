@@ -441,7 +441,7 @@ let presDrawing=false, drawTool='pen', drawColor='#ff0000', drawSize=3;
 let isDrawing=false, lastX=0, lastY=0;
 
 // ============ 版本刷新（自动清除浏览器缓存）============
-(function(){const v='240607A';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
+(function(){const v='240608B';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
 
 // ============ 初始化 ============
 window.addEventListener('DOMContentLoaded',()=>{
@@ -951,6 +951,8 @@ async function presentAll(){
 function enterPresentation(){
     presImgIdx=0;presZoom=1;presDrawing=false;
     document.getElementById('presOverlay').classList.add('active');
+    // 平板/手机：强制锁定横屏，图片展示更全
+    try{ if(screen.orientation && screen.orientation.lock){ screen.orientation.lock('landscape').catch(()=>{}); } }catch(e){}
     // 填充组选择下拉框
     const sel=document.getElementById('presGroupSelect');
     sel.innerHTML=presGroups.map((g,i)=>`<option value="${i}"${i===presGroupIdx?' selected':''}>${g.group_icon||''} ${g.group_name} · 第${g.group_num}组</option>`).join('');
@@ -1091,7 +1093,10 @@ function bindPresWheel(){
 function presGroupPrev(){if(presGroupIdx>0){presGroupIdx--;presImgIdx=0;presZoom=1;renderPresSlide();}}
 function presGroupNext(){if(presGroupIdx<presGroups.length-1){presGroupIdx++;presImgIdx=0;presZoom=1;renderPresSlide();}}
 function presJumpToGroup(idx){idx=parseInt(idx);if(idx>=0&&idx<presGroups.length){presGroupIdx=idx;presImgIdx=0;presZoom=1;renderPresSlide();}}
-function closePresentation(){document.getElementById('presOverlay').classList.remove('active');presDrawing=false;try{document.exitFullscreen?.();}catch(e){}}
+function closePresentation(){document.getElementById('presOverlay').classList.remove('active');presDrawing=false;try{document.exitFullscreen?.();}catch(e){}
+    // 退出展示模式后解除横屏锁定
+    try{ if(screen.orientation && screen.orientation.unlock){ screen.orientation.unlock(); } }catch(e){}
+}
 function presViewImages(){
     // ★ 只读查看图片库：不关闭展示模式，图片库弹窗覆盖在上方
     // 关闭图片库后展示继续，不影响展示顺序和内容
