@@ -908,7 +908,7 @@ function collectWorksheetData(gkey){
 }
 
 // ============ 版本刷新（自动清除浏览器缓存）============
-(function(){const v='240609O';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
+(function(){const v='240609P';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
 
 // ============ 初始化 ============
 window.addEventListener('DOMContentLoaded',()=>{
@@ -1568,20 +1568,39 @@ function renderPresImage(){
         return;
     }
     if(presImgIdx>=imgs.length)presImgIdx=imgs.length-1;if(presImgIdx<0)presImgIdx=0;
-    imgEl.src=imgs[presImgIdx];imgEl.style.display='block';imgEl.style.transform=`scale(${presZoom})`;
+    // 在 wrap 中创建缩放大容器（图片+名称一起缩放）
+    let zoomWrap = document.getElementById('presZoomWrap');
+    if(!zoomWrap){
+        zoomWrap = document.createElement('div');
+        zoomWrap.id = 'presZoomWrap';
+        zoomWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;transform-origin:center center;';
+        // 将现有图片和画布移入zoomWrap
+        const cvs = document.getElementById('presCanvas');
+        const img = document.getElementById('presImage');
+        const parent = img.parentNode;
+        // 创建图片名称元素
+        const nEl = document.createElement('div');
+        nEl.id = 'presImgName';
+        nEl.style.cssText = 'color:white;font-size:16px;font-weight:600;text-align:center;padding:4px 0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+        // 插入结构：zoomWrap包含图片+名称
+        parent.insertBefore(zoomWrap, img);
+        zoomWrap.appendChild(img);
+        zoomWrap.appendChild(nEl);
+        zoomWrap.appendChild(cvs);
+    }
+    const zoomWrapEl = document.getElementById('presZoomWrap');
+    zoomWrapEl.style.transform = `scale(${presZoom})`;
+    imgEl.src=imgs[presImgIdx];imgEl.style.display='block';imgEl.style.transform='none';
     navEl.style.display='flex';
     document.getElementById('presImgCounter').textContent=`${presImgIdx+1} / ${imgs.length}`;
-    // 显示图片名称
+    // 显示图片名称（随缩放放大）
     const imgName = (g.imageNames && g.imageNames[presImgIdx]) ? g.imageNames[presImgIdx] : '';
-    let nameEl = document.getElementById('presImgName');
-    if(!nameEl){
-        nameEl = document.createElement('div');
-        nameEl.id = 'presImgName';
-        nameEl.style.cssText = 'position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);color:white;padding:6px 18px;border-radius:8px;font-size:16px;font-weight:600;z-index:10;max-width:80%;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
-        document.getElementById('presImgWrap').appendChild(nameEl);
+    const nameEl = document.getElementById('presImgName');
+    if(nameEl){
+        nameEl.textContent = imgName;
+        nameEl.style.display = imgName ? 'block' : 'none';
+        nameEl.style.fontSize = Math.round(16 * presZoom) + 'px';
     }
-    nameEl.textContent = imgName;
-    nameEl.style.display = imgName ? 'block' : 'none';
     // 重置画布
     initPresCanvas();
 }
@@ -1653,16 +1672,18 @@ function clearPresDrawing(){const canvas=document.getElementById('presCanvas');i
 // 展示导航
 function presImgPrev(){const g=presGroups[presGroupIdx];if(!g||!g.images||!g.images.length)return;if(presImgIdx>0){presImgIdx--;presZoom=1;renderPresImage();}}
 function presImgNext(){const g=presGroups[presGroupIdx];if(!g||!g.images||!g.images.length)return;if(presImgIdx<g.images.length-1){presImgIdx++;presZoom=1;renderPresImage();}}
-function presZoomIn(){presZoom+=0.25;if(presZoom>5)presZoom=5;const img=document.getElementById('presImage');if(img)img.style.transform=`scale(${presZoom})`;}
-function presZoomOut(){if(presZoom>0.25){presZoom-=0.25;const img=document.getElementById('presImage');if(img)img.style.transform=`scale(${presZoom})`;}}
-function presZoomReset(){presZoom=1;const img=document.getElementById('presImage');if(img)img.style.transform='scale(1)';}
+function presZoomIn(){presZoom+=0.25;if(presZoom>5)presZoom=5;const zw=document.getElementById('presZoomWrap');if(zw){zw.style.transform=`scale(${presZoom})`;}const ne=document.getElementById('presImgName');if(ne)ne.style.fontSize=Math.round(16*presZoom)+'px';}
+function presZoomOut(){if(presZoom>0.25){presZoom-=0.25;const zw=document.getElementById('presZoomWrap');if(zw)zw.style.transform=`scale(${presZoom})`;const ne=document.getElementById('presImgName');if(ne)ne.style.fontSize=Math.round(16*presZoom)+'px';}}
+function presZoomReset(){presZoom=1;const zw=document.getElementById('presZoomWrap');if(zw)zw.style.transform='scale(1)';const ne=document.getElementById('presImgName');if(ne)ne.style.fontSize='16px';}
 // 鼠标滚轮缩放
 function presWheelZoom(e){
     e.preventDefault();
     const delta=e.deltaY>0?-0.15:0.15;
     presZoom=Math.max(0.25,Math.min(5,presZoom+delta));
-    const img=document.getElementById('presImage');
-    if(img)img.style.transform=`scale(${presZoom})`;
+    const zw=document.getElementById('presZoomWrap');
+    if(zw)zw.style.transform=`scale(${presZoom})`;
+    const ne=document.getElementById('presImgName');
+    if(ne)ne.style.fontSize=Math.round(16*presZoom)+'px';
 }
 window._presWheelBound=false;
 function bindPresWheel(){
