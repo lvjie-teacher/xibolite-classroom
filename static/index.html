@@ -569,7 +569,7 @@ const WORKSHEET_DATA = {
     }
 };
 
-let currentGroup=null, currentGroupNum=1, uploadedImages=[], imageUrls=[];
+let currentGroup=null, currentGroupNum=1, uploadedImages=[], imageUrls=[], uploadedNames=[];
 let viewerImages=[], viewerIndex=0, zoomLevel=1;
 let serverMode=false, cachedResults={}, sessionResults={};
 let presGroups=[], presGroupIdx=0, presImgIdx=0, presZoom=1;
@@ -908,7 +908,7 @@ function collectWorksheetData(gkey){
 }
 
 // ============ 版本刷新（自动清除浏览器缓存）============
-(function(){const v='240609N';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
+(function(){const v='240609O';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
 
 // ============ 初始化 ============
 window.addEventListener('DOMContentLoaded',()=>{
@@ -1070,6 +1070,7 @@ function deleteImage(idx){
     if(!confirm('确定要删除这张图片吗？'))return;
     uploadedImages.splice(idx,1);
     imageUrls.splice(idx,1);
+    uploadedNames.splice(idx,1);
     updateUploadArea();
     showNotification('✅ 图片已删除');
 }
@@ -1163,11 +1164,13 @@ async function confirmImageLibrary(){
             const b64=await new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(blob);});
             uploadedImages.push(b64);
             imageUrls.push(img.url);
+            uploadedNames.push(img.name);
             added++;
         }catch(e){
             // 降级：直接用服务器URL
             uploadedImages.push(img.url);
             imageUrls.push(img.url);
+            uploadedNames.push(img.name);
             added++;
         }
     }
@@ -1245,7 +1248,8 @@ function collectData(){
         east:document.getElementById('eastAnswer')?.value||'',
         conclusion:document.getElementById('conclusionAnswer')?.value||'',
         worksheet: collectWorksheetData(currentGroup),
-        images:imagesForSubmit
+        images:imagesForSubmit,
+        imageNames:uploadedNames.slice()
     };
 }
 
@@ -1567,6 +1571,17 @@ function renderPresImage(){
     imgEl.src=imgs[presImgIdx];imgEl.style.display='block';imgEl.style.transform=`scale(${presZoom})`;
     navEl.style.display='flex';
     document.getElementById('presImgCounter').textContent=`${presImgIdx+1} / ${imgs.length}`;
+    // 显示图片名称
+    const imgName = (g.imageNames && g.imageNames[presImgIdx]) ? g.imageNames[presImgIdx] : '';
+    let nameEl = document.getElementById('presImgName');
+    if(!nameEl){
+        nameEl = document.createElement('div');
+        nameEl.id = 'presImgName';
+        nameEl.style.cssText = 'position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);color:white;padding:6px 18px;border-radius:8px;font-size:16px;font-weight:600;z-index:10;max-width:80%;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+        document.getElementById('presImgWrap').appendChild(nameEl);
+    }
+    nameEl.textContent = imgName;
+    nameEl.style.display = imgName ? 'block' : 'none';
     // 重置画布
     initPresCanvas();
 }
@@ -1711,8 +1726,8 @@ function presCloseLibImageView(){
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
 let _saveTimer=null;
 function autoSaveDraft(){if(_saveTimer)clearTimeout(_saveTimer);_saveTimer=setTimeout(()=>{saveDraft();},800);}
-function saveDraft(){if(!currentGroup)return;try{const d=collectData();d.imageUrls=imageUrls.slice();localStorage.setItem(`draft_${currentGroup}_${currentGroupNum}`,JSON.stringify(d));}catch(e){}}
-function loadDraft(){try{const data=JSON.parse(localStorage.getItem(`draft_${currentGroup}_${currentGroupNum}`)||'null');if(!data)return false;const fa=document.getElementById('featureAnswer');if(data.feature&&fa)fa.value=data.feature;if(data.west)document.getElementById('westAnswer').value=data.west;if(data.east)document.getElementById('eastAnswer').value=data.east;if(data.conclusion)document.getElementById('conclusionAnswer').value=data.conclusion;if(data.worksheet)restoreWorksheetData(data.worksheet);if(data.images&&data.images.length){uploadedImages=data.images;updateUploadArea();}if(data.imageUrls&&data.imageUrls.length){imageUrls=data.imageUrls;}return true;}catch(e){return false;}}
+function saveDraft(){if(!currentGroup)return;try{const d=collectData();d.imageUrls=imageUrls.slice();d.uploadedNames=uploadedNames.slice();localStorage.setItem(`draft_${currentGroup}_${currentGroupNum}`,JSON.stringify(d));}catch(e){}}
+function loadDraft(){try{const data=JSON.parse(localStorage.getItem(`draft_${currentGroup}_${currentGroupNum}`)||'null');if(!data)return false;const fa=document.getElementById('featureAnswer');if(data.feature&&fa)fa.value=data.feature;if(data.west)document.getElementById('westAnswer').value=data.west;if(data.east)document.getElementById('eastAnswer').value=data.east;if(data.conclusion)document.getElementById('conclusionAnswer').value=data.conclusion;if(data.worksheet)restoreWorksheetData(data.worksheet);if(data.images&&data.images.length){uploadedImages=data.images;updateUploadArea();}if(data.imageUrls&&data.imageUrls.length){imageUrls=data.imageUrls;}if(data.uploadedNames&&data.uploadedNames.length){uploadedNames=data.uploadedNames;}return true;}catch(e){return false;}}
 function restoreWorksheetData(wsData){
     if(!wsData || !currentGroup) return;
     Object.keys(wsData).forEach(qKey => {
@@ -1742,14 +1757,10 @@ function showNotification(msg){const o=document.querySelector('.ntoast');if(o)o.
 const BUILTIN_IMAGE_LIB = [
   "俄罗斯1月平均气温.jpg",
   "俄罗斯7月平均气温.jpg",
-  "俄罗斯主要工业区和主要铁路分布.jpg",
-  "俄罗斯人口分布.jpg",
   "俄罗斯地形.jpg",
   "俄罗斯年降水量.jpg",
   "俄罗斯有永久冻土分布图.jpg",
-  "俄罗斯森林和矿产资源分布.jpg",
   "俄罗斯气候类型分布.jpg",
-  "俄罗斯种植业分布.jpg",
   "莫斯科气温曲线和降水量柱状图.jpg",
   "雅库茨克气温曲线和降水量柱状图.jpg"
 ];
