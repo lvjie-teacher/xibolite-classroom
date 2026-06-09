@@ -442,7 +442,7 @@ let presDrawing=false, drawTool='pen', drawColor='#ff0000', drawSize=3;
 let isDrawing=false, lastX=0, lastY=0;
 
 // ============ 版本刷新（自动清除浏览器缓存）============
-(function(){const v='240609A';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
+(function(){const v='240609B';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
 
 // ============ 初始化 ============
 window.addEventListener('DOMContentLoaded',()=>{
@@ -923,6 +923,13 @@ setInterval(()=>{
         refreshWall();
     }
 },10000);
+// 心跳保活：每13分钟 ping 服务器，防止 Render 15分钟无活动自动休眠
+// 只要有一个设备开着页面，服务器就不会休眠
+setInterval(()=>{
+    if(window.location.protocol!=='file:' && window.location.hostname!==''){
+        fetch('/api/config',{signal:AbortSignal.timeout(5000)}).catch(()=>{});
+    }
+},13*60*1000);
 
 function renderAchievementWall(results){
     const body=document.getElementById('achievementBody');const entries=Object.entries(results);
