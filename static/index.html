@@ -730,8 +730,14 @@ function gradeWorksheet(gkey){
                     inp.parentNode.insertBefore(icon, inp.nextSibling);
                     if(isRight) correct++;
                 });
-                // 显示 hint
-                if(q.errorHint) showWsHint(gkey, qi, q.errorHint);
+                // 检测书写错误
+                var hasShuffleTypo = false;
+                values.forEach(function(v){
+                    if(!v || q.blanks.find(function(b){ return b === v; })) return;
+                    if(q.blanks.some(function(b){ return isLikelyTypo(v, b); })) hasShuffleTypo = true;
+                });
+                if(hasShuffleTypo) showWsHint(gkey, qi, '书写错误');
+                else if(q.errorHint) showWsHint(gkey, qi, q.errorHint);
             }
             return; // 跳过普通判卷
         }
@@ -764,9 +770,18 @@ function gradeWorksheet(gkey){
             input.parentNode.insertBefore(icon, input.nextSibling);
             if(isRight) correct++;
         });
-        // 有错且是顺序换错 → 显示方向提示
-        if(qiBlankSwap && q.orderHint) showWsHint(gkey, qi, q.orderHint);
-        // 普通错误
+        // 检测书写错误 > 顺序换错 > 普通错误
+        var hasTypo = false;
+        if(qiHasBlankError){
+            (q.blanks || []).forEach((answer, bi) => {
+                const input = document.querySelector(`input[data-gkey="${gkey}"][data-qi="${qi}"][data-bi="${bi}"]`);
+                if(!input) return;
+                const val = input.value.trim();
+                if(val && !checkAnswer(val, answer, q.acceptAlt, q.alts, bi) && isLikelyTypo(val, answer)) hasTypo = true;
+            });
+        }
+        if(hasTypo) showWsHint(gkey, qi, '书写错误');
+        else if(qiBlankSwap && q.orderHint) showWsHint(gkey, qi, q.orderHint);
         else if(qiHasBlankError && q.errorHint) showWsHint(gkey, qi, q.errorHint);
 
         // ===== 处理 selects =====
@@ -836,6 +851,30 @@ function checkAnswer(val, answer, acceptAlt, alts, bi){
     }
     return false;
 }
+// 编辑距离（Levenshtein）用于检测书写错误
+function editDist(a, b){
+    const m=a.length, n=b.length;
+    const dp=Array.from({length:m+1},()=>Array(n+1).fill(0));
+    for(let i=0;i<=m;i++) dp[i][0]=i;
+    for(let j=0;j<=n;j++) dp[0][j]=j;
+    for(let i=1;i<=m;i++){
+        for(let j=1;j<=n;j++){
+            dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+        }
+    }
+    return dp[m][n];
+}
+function isLikelyTypo(val, answer){
+    const clean = s => s.replace(/\s/g,'').toLowerCase();
+    const cVal = clean(val);
+    const cAns = clean(answer);
+    if(!cVal || !cAns) return false;
+    const dist = editDist(cVal, cAns);
+    if(dist <= 0) return false; // 完全正确，不应该走到这里
+    // 2字词：编辑距离1算书写错误；3-4字词：编辑距离≤1算书写错误；5字以上：编辑距离≤2算书写错误
+    const threshold = cAns.length <= 2 ? 1 : (cAns.length <= 4 ? 1 : 2);
+    return dist <= threshold;
+}
 
 // ============ 任务单：收集数据 ============
 function collectWorksheetData(gkey){
@@ -855,7 +894,7 @@ function collectWorksheetData(gkey){
 }
 
 // ============ 版本刷新（自动清除浏览器缓存）============
-(function(){const v='240609H';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
+(function(){const v='240609I';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
 
 // ============ 初始化 ============
 window.addEventListener('DOMContentLoaded',()=>{
