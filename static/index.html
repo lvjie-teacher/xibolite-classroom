@@ -680,7 +680,7 @@ function gradeWorksheet(gkey){
     document.querySelectorAll('.ws-error-hint').forEach(el => el.remove());
 
     ws.questions.forEach((q, qi) => {
-        // ===== 处理 shuffle =====
+        // ===== 处理 shuffle（顺序不限 + 智能匹配错别字） =====
         if(q.shuffle && q.blanks && q.blanks.length > 1){
             var allInputs = document.querySelectorAll(`input[data-gkey="${gkey}"][data-qi="${qi}"]`);
             var values = [], allFilled = true;
@@ -697,48 +697,54 @@ function gradeWorksheet(gkey){
                 });
                 return;
             }
-            // 检查值是否一一对应（忽略顺序）
-            var sortedVals = values.slice().sort();
-            var sortedAns = q.blanks.slice().sort();
-            var allCorrect = sortedVals.every(function(v, i){ return v === sortedAns[i]; });
-            if(allCorrect){
-                allInputs.forEach(function(inp){
-                    total++; correct++;
-                    inp.className = inp.className.replace(/\bws-(correct|wrong)\b/g,'') + ' ws-correct';
-                    // 加✓
-                    var icon = inp.nextElementSibling;
-                    if(icon && icon.classList.contains('ws-grade-icon')) icon.remove();
-                    icon = document.createElement('span');
-                    icon.className = 'ws-grade-icon';
-                    icon.textContent = '✓';
-                    icon.style.color = '#4caf50';
-                    inp.parentNode.insertBefore(icon, inp.nextSibling);
-                });
-            } else {
-                // 有错的
-                allInputs.forEach(function(inp, bi){
-                    total++;
-                    var v = inp.value.trim();
-                    var isRight = !!q.blanks.find(function(b){ return b === v; });
-                    inp.className = inp.className.replace(/\bws-(correct|wrong)\b/g,'') + (isRight ? ' ws-correct' : ' ws-wrong');
-                    var icon = inp.nextElementSibling;
-                    if(icon && icon.classList.contains('ws-grade-icon')) icon.remove();
-                    icon = document.createElement('span');
-                    icon.className = 'ws-grade-icon';
-                    icon.textContent = isRight ? '✓' : '✗';
-                    icon.style.color = isRight ? '#4caf50' : '#f44336';
-                    inp.parentNode.insertBefore(icon, inp.nextSibling);
-                    if(isRight) correct++;
-                });
-                // 检测书写错误
-                var hasShuffleTypo = false;
-                values.forEach(function(v){
-                    if(!v || q.blanks.find(function(b){ return b === v; })) return;
-                    if(q.blanks.some(function(b){ return isLikelyTypo(v, b); })) hasShuffleTypo = true;
-                });
-                if(hasShuffleTypo) showWsHint(gkey, qi, '书写错误');
-                else if(q.errorHint) showWsHint(gkey, qi, q.errorHint);
+            // 模糊匹配函数：先精确→再 alts→再错别字
+            function fuzzyMatch(v, candidates){
+                var exact = candidates.indexOf(v);
+                if(exact >= 0) return candidates[exact];
+                for(var ci=0; ci<candidates.length; ci++){
+                    if(checkAnswer(v, candidates[ci], q.acceptAlt, q.alts, 0)) return candidates[ci];
+                }
+                for(var ci=0; ci<candidates.length; ci++){
+                    if(isLikelyTypo(v, candidates[ci])) return candidates[ci];
+                }
+                return null;
             }
+            // 逐值匹配（已匹配的答案不可重复占用）
+            var remaining = q.blanks.slice();
+            var results = [];
+            values.forEach(function(v){
+                var matched = fuzzyMatch(v, remaining);
+                if(matched){
+                    var ri = remaining.indexOf(matched);
+                    if(ri >= 0) remaining.splice(ri, 1);
+                    results.push({value:v, matched:true, matchedTo:matched});
+                } else {
+                    results.push({value:v, matched:false});
+                }
+            });
+            // 渲染结果
+            var hasShuffleTypo = false;
+            allInputs.forEach(function(inp, bi){
+                var r = results[bi];
+                total++;
+                if(r.matched){
+                    correct++;
+                    inp.className = inp.className.replace(/\bws-(correct|wrong)\b/g,'') + ' ws-correct';
+                } else {
+                    inp.className = inp.className.replace(/\bws-(correct|wrong)\b/g,'') + ' ws-wrong';
+                    // 检测是否错别字
+                    if(q.blanks.some(function(b){ return isLikelyTypo(r.value, b); })) hasShuffleTypo = true;
+                }
+                var icon = inp.nextElementSibling;
+                if(icon && icon.classList.contains('ws-grade-icon')) icon.remove();
+                icon = document.createElement('span');
+                icon.className = 'ws-grade-icon';
+                icon.textContent = r.matched ? '✓' : '✗';
+                icon.style.color = r.matched ? '#4caf50' : '#f44336';
+                inp.parentNode.insertBefore(icon, inp.nextSibling);
+            });
+            if(hasShuffleTypo) showWsHint(gkey, qi, '书写错误');
+            else if(q.errorHint) showWsHint(gkey, qi, q.errorHint);
             return; // 跳过普通判卷
         }
 
@@ -894,7 +900,7 @@ function collectWorksheetData(gkey){
 }
 
 // ============ 版本刷新（自动清除浏览器缓存）============
-(function(){const v='240609I';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
+(function(){const v='240609J';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
 
 // ============ 初始化 ============
 window.addEventListener('DOMContentLoaded',()=>{
