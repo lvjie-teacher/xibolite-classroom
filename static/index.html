@@ -86,23 +86,8 @@
         .region-card.west { background: #e3f2fd; border-left-color: #1565c0; }
         .region-card.east { background: #ffebee; border-left-color: #c62828; }
         .region-label { font-size: 14px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-        .analysis-guide { border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; border-left: 4px solid; }
-        .analysis-guide.terrain { background: #efebe9; border-left-color: #795548; }
-        .analysis-guide.climate { background: #fff3e0; border-left-color: #e65100; }
-        .analysis-guide.river  { background: #e3f2fd; border-left-color: #1565c0; }
-        .analysis-guide .ag-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-        .analysis-guide.terrain .ag-title { color: #4e342e; }
-        .analysis-guide.climate .ag-title { color: #bf360c; }
-        .analysis-guide.river  .ag-title { color: #0d47a1; }
-        .analysis-guide .ag-steps { padding-left: 0; list-style: none; counter-reset: step; margin: 0; }
-        .analysis-guide .ag-steps li { font-size: 13px; color: #444; padding: 3px 0 3px 22px; position: relative; line-height: 1.6; }
-        .analysis-guide .ag-steps li::before { counter-increment: step; content: counter(step); position: absolute; left: 0; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #999; color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-        .analysis-guide.terrain .ag-steps li::before { background: #795548; }
-        .analysis-guide.climate .ag-steps li::before { background: #e65100; }
-        .analysis-guide.river  .ag-steps li::before { background: #1565c0; }
-        .analysis-guide .ag-steps li strong { color: #1a237e; }
-        .analysis-guide .ag-note { font-size: 12px; color: #888; margin-top: 8px; padding: 6px 8px; background: rgba(255,255,255,0.6); border-radius: 6px; }
         .tip-box strong { color: #e65100; }
+        /* == 任务单 · 填空探究 （自动判卷样式见下方）== */
         .conclusion-section { background: #f3e5f5; border-radius: 8px; padding: 16px; margin-bottom: 16px; border-left: 4px solid #7b1fa2; }
         .conclusion-label { font-size: 15px; font-weight: 600; color: #4a148c; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 
@@ -485,33 +470,15 @@
 const GROUPS = {
     terrain: { id:'terrain', name:'地形组', icon:'🏔️', gradient:'linear-gradient(135deg,#795548,#8d6e63)', color:'#795548', keyword:'地形 地貌 剖面图',
         task1:{ title:'从课本图册中找到地形相关图片，拍照上传', featureLabel:'地形特征归纳', featurePH:'' },
-        task2:{ westTitle:'🔵 俄罗斯西部', westPH:'', eastTitle:'🔴 俄罗斯东部', eastPH:'', conclusionPH:'' },
-        analysisGuide:{ cls:'terrain', title:'🏔️ 分析地形特征的一般方法', steps:[
-            '先找出主要的<strong>地形区</strong>，分析地形类型有<strong>多少种</strong>，是<strong>多样还是单一</strong>',
-            '判断<strong>以什么地形为主</strong>（平原/高原/山地/盆地…）',
-            '看这些地形的<strong>分布特征</strong>，根据分布判断<strong>地势高低</strong>——哪边高、哪边低',
-            '最后分析<strong>地势起伏的大小</strong>（起伏大/小？）'
-        ]}
+        task2:{ westTitle:'🔵 俄罗斯西部', westPH:'', eastTitle:'🔴 俄罗斯东部', eastPH:'', conclusionPH:'' }
     },
     climate: { id:'climate', name:'气候组', icon:'🌡️', gradient:'linear-gradient(135deg,#e65100,#ff6d00)', color:'#e65100', keyword:'气候 气温 降水 分布图',
         task1:{ title:'从课本图册中找到气候相关图片，拍照上传', featureLabel:'气候特征归纳', featurePH:'' },
-        task2:{ westTitle:'🔵 俄罗斯西部', westPH:'', eastTitle:'🔴 俄罗斯东部', eastPH:'', conclusionPH:'' },
-        analysisGuide:{ cls:'climate', title:'🌡️ 分析气候特征的一般方法', steps:[
-            '看图中有<strong>多少种气候类型</strong>，分析气候类型是<strong>多样还是单一</strong>',
-            '判断<strong>以什么气候类型为主</strong>（温带大陆性/寒带/亚热带…）',
-            '分析这些气候在<strong>空间上的分布</strong>（南北差异？东西差异？）',
-            '总体概括区域气候<strong>主要特征</strong>——寒冷还是温暖？干燥还是湿润？'
-        ]}
+        task2:{ westTitle:'🔵 俄罗斯西部', westPH:'', eastTitle:'🔴 俄罗斯东部', eastPH:'', conclusionPH:'' }
     },
     river: { id:'river', name:'河湖组', icon:'🌊', gradient:'linear-gradient(135deg,#1565c0,#1976d2)', color:'#1565c0', keyword:'河湖 鄂毕河 叶尼塞河 勒拿河',
         task1:{ title:'从课本图册中找到河湖相关图片，拍照上传', featureLabel:'河湖特征归纳', featurePH:'' },
-        task2:{ westTitle:'🔵 俄罗斯西部', westPH:'', eastTitle:'🔴 俄罗斯东部', eastPH:'', conclusionPH:'' },
-        analysisGuide:{ cls:'river', title:'🌊 分析河湖特征的一般方法', steps:[
-            '整体看河流湖泊<strong>数量多少</strong>（多/少），是否<strong>分布均匀</strong>；若不均匀，<strong>哪里集中</strong>',
-            '找出几条<strong>代表性河流</strong>（如鄂毕河、叶尼塞河、勒拿河）',
-            '分析河流<strong>流程长短</strong>、<strong>流向</strong>、<strong>流速</strong>、<strong>流量及季节变化</strong>、<strong>结冰期</strong>（长短？有无？）',
-            '分析河流<strong>航运价值</strong>（高/低？说明原因）'
-        ]}
+        task2:{ westTitle:'🔵 俄罗斯西部', westPH:'', eastTitle:'🔴 俄罗斯东部', eastPH:'', conclusionPH:'' }
     },
 };
 
@@ -521,12 +488,12 @@ const WORKSHEET_DATA = {
         label: '地形组', icon: '地', cls: 'terr',
         questions: [
             {
-                text: '俄罗斯的地形类型{select:多样|单一}，以{blank}、{blank}、{blank}地形为主。<span style="display:block;font-size:11px;color:#999;margin-top:2px;font-style:italic;">（教材第81页）</span>',
+                text: '俄罗斯的地形类型{select:多样|单一}，以{blank}、{blank}、{blank}地形为主。',
                 blanks: ['平原','高原','山地'],
                 selectIdx: 0, answers: ['多样']
             },
             {
-                text: '读图判断，自西向东地形区依次为：东欧平原 → {blank} → 中西伯利亚高原 → {blank}。<span style="display:block;font-size:11px;color:#999;margin-top:2px;font-style:italic;">（教材第81页 图8-2-2）</span>',
+                text: '读图判断，自西向东地形区依次为：东欧平原 → {blank} → 中西伯利亚高原 → {blank}。',
                 blanks: ['西西伯利亚平原','东西伯利亚山地']
             },
             {
@@ -540,11 +507,11 @@ const WORKSHEET_DATA = {
         label: '气候组', icon: '气', cls: 'clima',
         questions: [
             {
-                text: '俄罗斯共有{blank}种气候类型，气候种类呈现{select:多样|单一}的特点。<span style="display:block;font-size:11px;color:#999;margin-top:2px;font-style:italic;">（教材第82页 图8-2-6）</span>',
+                text: '俄罗斯共有{blank}种气候类型，气候种类呈现{select:多样|单一}的特点。',
                 blanks: ['4'], selectIdx: 1, answers: ['多样']
             },
             {
-                text: '大部分地区属于{blank}气候区。<span style="display:block;font-size:11px;color:#999;margin-top:2px;font-style:italic;">（教材第83页）</span>',
+                text: '大部分地区属于{blank}气候区。',
                 blanks: ['温带大陆性']
             },
             {
@@ -553,9 +520,15 @@ const WORKSHEET_DATA = {
                 answers: ['北','东','太平洋']
             },
             {
-                text: '冬季{blank}且{blank}，夏季{blank}而{blank}。<span style="display:block;font-size:11px;color:#999;margin-top:2px;font-style:italic;">（月均温＜10℃计入冬季；＞22℃计入夏季）（教材第83页）</span>',
+                text: '冬季{blank}且{blank}，夏季{blank}而{blank}。',
                 blanks: ['寒冷/严寒','漫长','温暖','短促'],
-                acceptAlt: true
+                acceptAlt: true,
+                alts: [
+                    ['寒冷','严寒','冷','寒','很冷','极寒','酷寒'],
+                    ['漫长','长','很长','久','长久'],
+                    ['温暖','凉爽','凉快','暖和','温和','暖','凉'],
+                    ['短促','短','短暂','很短','比较短']
+                ]
             }
         ]
     },
@@ -567,11 +540,11 @@ const WORKSHEET_DATA = {
                 selects: [['众多','稀少']], answers: ['众多']
             },
             {
-                text: '西伯利亚三大河流自西向东：{blank}河 → 叶尼塞河 → {blank}河。<span style="display:block;font-size:11px;color:#999;margin-top:2px;font-style:italic;">（教材第82-83页）</span>',
+                text: '西伯利亚三大河流自西向东：{blank}河 → 叶尼塞河 → {blank}河。',
                 blanks: ['鄂毕','勒拿']
             },
             {
-                text: '欧洲部分最长的河流是{blank}河（"母亲河"）。<span style="display:block;font-size:11px;color:#999;margin-top:2px;font-style:italic;">（教材第82页 图8-2-5）</span>',
+                text: '欧洲部分最长的河流是{blank}河（"母亲河"）。',
                 blanks: ['伏尔加']
             },
             {
@@ -619,12 +592,14 @@ function getGroupColor(k){
 }
 
 function renderOneQuestion(q, qi, gkey, cls){
-    // 解析题目文本中的 {blank} 和 {select:...} 占位符
+    // 解析题目文本中的 {blank} 和 {select:...} 占位符，根据答案长度自动调整框宽
     let blankIdx = 0;
     let selectIdx = 0;
     const html = q.text.replace(/\{blank\}/g, () => {
         const i = blankIdx++;
-        return `<input class="ws-blank ws-${cls}-blank" type="text" data-qi="${qi}" data-bi="${i}" data-gkey="${gkey}" placeholder="?"/>`;
+        const answer = (q.blanks || [])[i] || '';
+        const width = Math.max(50, answer.length * 14 + 6);
+        return `<input class="ws-blank ws-${cls}-blank" type="text" data-qi="${qi}" data-bi="${i}" data-gkey="${gkey}" placeholder="" style="width:${width}px"/>`;
     }).replace(/\{select:([^}]+)\}/g, (match, optionsStr) => {
         const opts = optionsStr.split('|');
         const i = selectIdx++;
@@ -704,7 +679,7 @@ function gradeWorksheet(gkey){
             const val = input.value.trim();
             if(!val){ input.className = input.className.replace(/\bws-(correct|wrong)\b/g,''); return; }
 
-            const isRight = checkAnswer(val, answer, q.acceptAlt);
+            const isRight = checkAnswer(val, answer, q.acceptAlt, q.alts, bi);
             input.className = input.className.replace(/\bws-(correct|wrong)\b/g,'') + (isRight ? ' ws-correct' : ' ws-wrong');
             // 添加对错图标
             let icon = input.nextElementSibling;
@@ -731,11 +706,12 @@ function gradeWorksheet(gkey){
         });
     });
 
-    // 显示得分
+    // 显示得分 + 评价
     const scoreEl = document.getElementById(`wsScore_${gkey}`);
     if(scoreEl){
         const pct = total > 0 ? Math.round(correct/total*100) : 0;
-        scoreEl.innerHTML = `<span class="ws-score ${pct>=60?'good':'bad'}">${correct}/${total}（${pct}%）</span>`;
+        const ev = getEvalText(pct, correct, total);
+        scoreEl.innerHTML = `<span class="ws-score ${pct>=60?'good':'bad'}">${correct}/${total}（${pct}%）</span> <span style="font-size:12px;color:#888;margin-left:6px;">${ev}</span>`;
     }
 
     // 保存判卷结果
@@ -743,16 +719,28 @@ function gradeWorksheet(gkey){
     return {correct, total};
 }
 
-function checkAnswer(val, answer, acceptAlt){
+function getEvalText(pct, correct, total){
+    if(pct===100) return '🎉 全对，非常棒！';
+    if(pct>=80) return '👍 掌握很好！';
+    if(pct>=60) return '💪 基本掌握了！';
+    if(pct>=40) return '📖 再看看课本吧';
+    if(pct>0) return '💪 需要多练习哦';
+    return '❌ 还没作答呢';
+}
+
+function checkAnswer(val, answer, acceptAlt, alts, bi){
     if(!val || !answer) return false;
+    const clean = s => s.replace(/\s/g,'').toLowerCase();
+    const cVal = clean(val);
+    const cAns = clean(answer);
     // 精确匹配
-    if(val === answer) return true;
-    // 忽略空格和大小写
-    if(val.replace(/\s/g,'').toLowerCase() === answer.replace(/\s/g,'').toLowerCase()) return true;
+    if(cVal === cAns) return true;
+    // 使用自定义宽松备选列表（如气候Q4可写"冷"替代"寒冷"）
+    if(alts && alts[bi] && alts[bi].some(a => cVal === clean(a))) return true;
     // 允许相近答案（用/分隔的可选答案）
-    if(acceptAlt && answer.includes('/')){
-        const alts = answer.split('/');
-        if(alts.some(a => val.replace(/\s/g,'').toLowerCase() === a.replace(/\s/g,'').toLowerCase())) return true;
+    if(acceptAlt && cAns.includes('/')){
+        const alts2 = cAns.split('/');
+        if(alts2.some(a => cVal === a)) return true;
     }
     return false;
 }
@@ -775,7 +763,7 @@ function collectWorksheetData(gkey){
 }
 
 // ============ 版本刷新（自动清除浏览器缓存）============
-(function(){const v='240609C';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
+(function(){const v='240609D';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
 
 // ============ 初始化 ============
 window.addEventListener('DOMContentLoaded',()=>{
@@ -874,10 +862,8 @@ function resumeClass(){const s=localStorage.getItem('selectedGroup');if(!s)retur
 function renderMainApp(){
     const g=GROUPS[currentGroup];
     document.getElementById('headerSubtitle').textContent=`${g.icon} ${g.name} · 第${currentGroupNum}小组`;
-    const guide=g.analysisGuide?`<div class="analysis-guide ${g.analysisGuide.cls}"><div class="ag-title">${g.analysisGuide.title}</div><ol class="ag-steps">${g.analysisGuide.steps.map(s=>`<li>${s}</li>`).join('')}</ol><div class="ag-note">💡 按以上步骤思考，再填写下方任务</div></div>`:'';
     document.getElementById('groupCardContainer').innerHTML=`
     <div class="group-card"><div class="group-header" style="background:${g.gradient}"><span class="group-icon">${g.icon}</span><span class="group-name">${g.name} · 第${currentGroupNum}小组</span></div><div class="group-body">
-        ${guide}
         ${renderWorksheet()}
         <div class="task-section"><div class="task-title"><span class="emoji">📸</span>任务一：${g.task1.title}</div>
             <div class="upload-area" id="uploadArea" onclick="triggerUpload()"><div class="upload-icon">📤</div><div class="upload-text">点击此处上传图片</div></div>
