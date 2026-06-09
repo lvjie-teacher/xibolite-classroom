@@ -272,6 +272,92 @@
         .pres-overlay.libview .pres-img-nav { display: none !important; }
         #presBackBtn { display: none; }
         .pres-overlay.libview #presBackBtn { display: inline-block !important; }
+
+        /* ========== 任务单 · 填空探究 ========== */
+        .ws-card { border-radius: 12px; overflow: hidden; margin-bottom: 14px; border: 1.5px solid; }
+        .ws-header { padding: 10px 16px; display: flex; align-items: center; gap: 8px; color: white; font-size: 14px; font-weight: 600; }
+        .ws-body { padding: 14px 16px; background: white; }
+        .ws-q { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
+        .ws-q:last-child { margin-bottom: 0; }
+        .ws-num { flex-shrink:0; width:24px;height:24px;border-radius:50%;color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700; }
+        .ws-text { flex:1; font-size:13.5px; line-height:1.8; }
+        .ws-blank {
+            display:inline-block; min-width:48px; text-align:center;
+            border:none; border-bottom:2.5px dashed; background:transparent;
+            outline:none; font-family:inherit; font-weight:600; padding:0 3px;
+            transition:all 0.2s; color:#333;
+        }
+        .ws-blank:focus { border-bottom-style:solid; }
+        .ws-select {
+            padding:2px 6px; border:1.5px solid; border-radius:5px;
+            background:white; font-family:inherit; font-size:13px; font-weight:500;
+            outline:none; cursor:pointer;
+        }
+        /* 语音按钮 */
+        .ws-voice-btn {
+            width:26px;height:26px;border-radius:50%;border:none;color:white;
+            font-size:12px;cursor:pointer;display:inline-flex;align-items:center;
+            justify-content:center;margin-left:2px;vertical-align:middle;
+            background:linear-gradient(135deg,#7c4dff,#651fff);
+            box-shadow:0 2px 6px rgba(124,77,255,0.4);transition:all 0.2s;
+            position:relative;top:-1px;
+        }
+        .ws-voice-btn:hover{ transform:scale(1.15); box-shadow:0 3px 10px rgba(124,77,255,0.5); }
+        .ws-voice-btn.recording{ animation:voicePulse 1s infinite; background:linear-gradient(135deg,#ff5252,#d32f2f); }
+        @keyframes voicePulse{ 0%,100%{box-shadow:0 0 0 0 rgba(255,82,82,0.5);} 50%{box-shadow:0 0 0 8px rgba(255,82,82,0);} }
+
+        /* 自动判卷 */
+        .ws-correct { border-bottom-color: #4caf50 !important; color: #2e7d32 !important; background: #e8f5e9; border-radius: 3px; padding: 0 4px;}
+        .ws-wrong { border-bottom-color: #f44336 !important; color: #c62828 !important; background: #ffebee; border-radius: 3px; padding: 0 4px;}
+        .ws-grade-icon { font-size:15px; margin-left:3px; vertical-align:middle; }
+        .ws-grade-bar {
+            text-align:right; margin-top:8px; padding-top:8px;
+            border-top:1px dashed #e0e0e0; font-size:12px; color:#666;
+        }
+        .ws-score { font-weight:700; font-size:18px; }
+        .ws-score.good { color:#2e7d32; }
+        .ws-score.bad { color:#c62828; }
+
+        /* 地形组 - 绿色 */
+        .ws-terr { border-color:#639922; } .ws-terr .ws-header { background:#EAF3DE; color:#27500A; border-bottom-color:#639922; }
+        .ws-terr .ws-num { background:#639922; } .ws-terr .ws-blank { color:#639922; border-bottom-color:#639922; }
+        .ws-terr .ws-select { border-color:#97C459; color:#639922; }
+        /* 气候组 - 红色 */
+        .ws-clima { border-color:#E24B4A; } .ws-clima .ws-header { background:#FCEBEB; color:#791F1F; border-bottom-color:#E24B4A; }
+        .ws-clima .ws-num { background:#E24B4A; } .ws-clima .ws-blank { color:#E24B4A; border-bottom-color:#E24B4A; }
+        .ws-clima .ws-select { border-color:#F09595; color:#E24B4A; }
+        /* 河流组 - 蓝色 */
+        .ws-river { border-color:#378ADD; } .ws-river .ws-header { background:#E6F1FB; color:#0C447C; border-bottom-color:#378ADD; }
+        .ws-river .ws-num { background:#378ADD; } .ws-river .ws-blank { color:#378ADD; border-bottom-color:#378ADD; }
+        .ws-river .ws-select { border-color:#85B7EB; color:#378ADD; }
+
+        /* 展示模式：任务Tab切换 */
+        .pres-task-tabs { display:flex; gap:0; margin-bottom:16px; }
+        .pres-tab-btn {
+            flex:1; padding:10px 0; border:none; background:rgba(255,255,255,0.08);
+            color:rgba(255,255,255,0.5); font-size:14px; font-weight:600;
+            cursor:pointer; transition:all 0.25s; border-radius:8px 8px 0 0;
+            letter-spacing:1px;
+        }
+        .pres-tab-btn.active { background:rgba(255,255,255,0.18); color:white; }
+        .pres-tab-btn:hover:not(.active) { background:rgba(255,255,255,0.12); color:rgba(255,255,255,0.75); }
+        .pres-tab-content { display:none; }
+        .pres-tab-content.active { display:block; animation:fadeIn 0.25s ease-out; }
+
+        /* 展示区：三组答案对比 */
+        .pres-ws-grid { display:flex; flex-direction:column; gap:12px; }
+        .pres-ws-group { border-radius:10px; padding:12px 14px; }
+        .pres-ws-group.terrain { background:rgba(99,153,34,0.15); border-left:3px solid #639922; }
+        .pres-ws-group.climate { background:rgba(226,75,74,0.15); border-left:3px solid #E24B4A; }
+        .pres-ws-group.river { background:rgba(55,138,221,0.15); border-left:3px solid #378ADD; }
+        .pres-ws-gname { font-size:13px; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+        .pres-ws-row { font-size:12.5px; line-height:1.8; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px dotted rgba(255,255,255,0.1); }
+        .pres-ws-row:last-child { border-bottom:none; }
+        .pres-ws-qlabel { color:rgba(255,255,255,0.5); font-weight:600; margin-right:4px; }
+        .pres-ws-answer { font-weight:500; }
+        .pres-ws-answer.correct { color:#69f0ae; }
+        .pres-ws-answer.wrong { color:#ff8a80; text-decoration:line-through; }
+        .pres-ws-empty { color:rgba(255,255,255,0.3); font-style:italic; }
     </style>
 </head>
 <body>
@@ -429,6 +515,73 @@ const GROUPS = {
     },
 };
 
+// ============ 任务单数据（填空题 + 标准答案 + 判卷逻辑）============
+const WORKSHEET_DATA = {
+    terrain: {
+        label: '地形组', icon: '地', cls: 'terr',
+        questions: [
+            {
+                text: '俄罗斯的地形类型{select:多样|单一}，以{blank}、{blank}、{blank}地形为主。<span style="display:block;font-size:11px;color:#999;margin-top:2px;font-style:italic;">（教材第81页）</span>',
+                blanks: ['平原','高原','山地'],
+                selectIdx: 0, answers: ['多样']
+            },
+            {
+                text: '读图判断，自西向东地形区依次为：东欧平原 → {blank} → 中西伯利亚高原 → {blank}。<span style="display:block;font-size:11px;color:#999;margin-top:2px;font-style:italic;">（教材第81页 图8-2-2）</span>',
+                blanks: ['西西伯利亚平原','东西伯利亚山地']
+            },
+            {
+                text: '俄罗斯的总体地势特征是{select:东高西低|西高东低|南高北低}，地势起伏程度总体{select:较大|较小}。',
+                selects: [['东高西低','西高东低','南高北低'],['较大','较小']],
+                answers: ['东高西低','较大']
+            }
+        ]
+    },
+    climate: {
+        label: '气候组', icon: '气', cls: 'clima',
+        questions: [
+            {
+                text: '俄罗斯共有{blank}种气候类型，气候种类呈现{select:多样|单一}的特点。<span style="display:block;font-size:11px;color:#999;margin-top:2px;font-style:italic;">（教材第82页 图8-2-6）</span>',
+                blanks: ['4'], selectIdx: 1, answers: ['多样']
+            },
+            {
+                text: '大部分地区属于{blank}气候区。<span style="display:block;font-size:11px;color:#999;margin-top:2px;font-style:italic;">（教材第83页）</span>',
+                blanks: ['温带大陆性']
+            },
+            {
+                text: '寒带气候主要分布在俄罗斯{select:北|南|东|西}部地区；温带季风气候分布在{select:东|西|南|北}部{select:太平洋|大西洋|北冰洋}沿岸地区。',
+                selects: [['北','南','东','西'],['东','西','南','北'],['太平洋','大西洋','北冰洋']],
+                answers: ['北','东','太平洋']
+            },
+            {
+                text: '冬季{blank}且{blank}，夏季{blank}而{blank}。<span style="display:block;font-size:11px;color:#999;margin-top:2px;font-style:italic;">（月均温＜10℃计入冬季；＞22℃计入夏季）（教材第83页）</span>',
+                blanks: ['寒冷/严寒','漫长','温暖','短促'],
+                acceptAlt: true
+            }
+        ]
+    },
+    river: {
+        label: '河流组', icon: '水', cls: 'river',
+        questions: [
+            {
+                text: '俄罗斯的河流湖泊数量{select:众多|稀少}。',
+                selects: [['众多','稀少']], answers: ['众多']
+            },
+            {
+                text: '西伯利亚三大河流自西向东：{blank}河 → 叶尼塞河 → {blank}河。<span style="display:block;font-size:11px;color:#999;margin-top:2px;font-style:italic;">（教材第82-83页）</span>',
+                blanks: ['鄂毕','勒拿']
+            },
+            {
+                text: '欧洲部分最长的河流是{blank}河（"母亲河"）。<span style="display:block;font-size:11px;color:#999;margin-top:2px;font-style:italic;">（教材第82页 图8-2-5）</span>',
+                blanks: ['伏尔加']
+            },
+            {
+                text: '受纬度较高影响，大部分河流结冰期{select:很长|很短|无}。',
+                selects: [['很长','很短','无']], answers: ['很长']
+            }
+        ]
+    }
+};
+
 let currentGroup=null, currentGroupNum=1, uploadedImages=[], imageUrls=[];
 let viewerImages=[], viewerIndex=0, zoomLevel=1;
 let serverMode=false, cachedResults={}, sessionResults={};
@@ -440,9 +593,189 @@ let selectedGroup=null;
 // 画笔状态
 let presDrawing=false, drawTool='pen', drawColor='#ff0000', drawSize=3;
 let isDrawing=false, lastX=0, lastY=0;
+// 任务单状态
+let wsRecognition = null; // Web Speech API 实例
+
+// ============ 任务单：渲染 ============
+function renderWorksheet(){
+    const gkey = currentGroup;
+    const ws = WORKSHEET_DATA[gkey];
+    if(!ws) return '';
+    const cls = ws.cls;
+    return `<div class="ws-card ws-${cls}">
+        <div class="ws-header"><span style="background:${getGroupColor(gkey)};width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;">${ws.icon}</span> ${ws.label} · 填空探究</div>
+        <div class="ws-body">
+            ${ws.questions.map((q, qi) => renderOneQuestion(q, qi, gkey, cls)).join('')}
+            <div class="ws-grade-bar" id="wsGradeBar_${gkey}">
+                <button onclick="gradeWorksheet('${gkey}')" style="padding:6px 16px;border:none;border-radius:6px;background:#1a237e;color:white;font-size:13px;font-weight:600;cursor:pointer;">✅ 提交判卷</button>
+                <span id="wsScore_${gkey}" style="margin-left:10px;"></span>
+            </div>
+        </div>
+    </div>`;
+}
+
+function getGroupColor(k){
+    return {terrain:'#639922', climate:'#E24B4A', river:'#378ADD'}[k]||'#666';
+}
+
+function renderOneQuestion(q, qi, gkey, cls){
+    // 解析题目文本中的 {blank} 和 {select:...} 占位符
+    let blankIdx = 0;
+    let selectIdx = 0;
+    const html = q.text.replace(/\{blank\}/g, () => {
+        const i = blankIdx++;
+        return `<input class="ws-blank ws-${cls}-blank" type="text" data-qi="${qi}" data-bi="${i}" data-gkey="${gkey}" placeholder="?"/>`;
+    }).replace(/\{select:([^}]+)\}/g, (match, optionsStr) => {
+        const opts = optionsStr.split('|');
+        const i = selectIdx++;
+        return `<select class="ws-select ws-${cls}-select" data-qi="${qi}" data-si="${i}" data-gkey="${gkey}"><option value="">--</option>${opts.map(o=>`<option value="${o}">${o}</option>`).join('')}</select>`;
+    });
+
+    // 在每个填空后添加语音按钮
+    const voiceHtml = html.replace(/(<input[^>]*data-gkey="${gkey}"[^>]*>)/g, '$1<button class="ws-voice-btn" onclick="startVoiceInput(this)" title="语音输入">🎤</button>');
+
+    return `<div class="ws-q"><span class="ws-num ws-${cls}-num">${qi+1}</span><div class="ws-text">${voiceHtml}</div></div>`;
+}
+
+// ============ 任务单：语音输入 ============
+function startVoiceInput(btn){
+    if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
+        showNotification('⚠️ 您的浏览器不支持语音输入，请使用Chrome浏览器');
+        return;
+    }
+    // 如果正在录音则停止
+    if(btn.classList.contains('recording')){
+        stopVoiceInput(btn); return;
+    }
+    const SpeechAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    wsRecognition = new SpeechAPI();
+    wsRecognition.lang = 'zh-CN';
+    wsRecognition.continuous = false;
+    wsRecognition.interimResults = false;
+    btn.classList.add('recording');
+    btn.textContent = '🔴';
+
+    wsRecognition.onresult = function(e){
+        const text = e.results[0][0].transcript.trim();
+        // 找到这个按钮前面的 input
+        const input = btn.previousElementSibling;
+        if(input && (input.tagName === 'INPUT' || input.tagName === 'SELECT')){
+            if(input.tagName === 'INPUT') input.value = text;
+            else {
+                // 对于 select，尝试匹配选项
+                const opts = Array.from(input.options);
+                const match = opts.find(o => o.value.includes(text) || text.includes(o.value));
+                if(match) input.value = match.value;
+                else showNotification(`未找到匹配选项："${text}"`);
+            }
+        }
+        stopVoiceInput(btn);
+        // 自动触发一次判卷
+        setTimeout(()=>gradeWorksheet(currentGroup), 300);
+    };
+    wsRecognition.onerror = function(){
+        stopVoiceInput(btn);
+        showNotification('❌ 语音识别失败，请重试');
+    };
+    wsRecognition.onend = function(){ stopVoiceInput(btn); };
+
+    wsRecognition.start();
+    showNotification('🎤 请开始说话...');
+}
+
+function stopVoiceInput(btn){
+    if(wsRecognition){ try{wsRecognition.stop();}catch(e){} wsRecognition=null; }
+    btn.classList.remove('recording');
+    btn.textContent = '🎤';
+}
+
+// ============ 任务单：自动判卷 ============
+function gradeWorksheet(gkey){
+    const ws = WORKSHEET_DATA[gkey];
+    if(!ws) return;
+    let correct = 0, total = 0;
+
+    ws.questions.forEach((q, qi) => {
+        // 处理 blanks
+        (q.blanks || []).forEach((answer, bi) => {
+            total++;
+            const input = document.querySelector(`input[data-gkey="${gkey}"][data-qi="${qi}"][data-bi="${bi}"]`);
+            if(!input) return;
+            const val = input.value.trim();
+            if(!val){ input.className = input.className.replace(/\bws-(correct|wrong)\b/g,''); return; }
+
+            const isRight = checkAnswer(val, answer, q.acceptAlt);
+            input.className = input.className.replace(/\bws-(correct|wrong)\b/g,'') + (isRight ? ' ws-correct' : ' ws-wrong');
+            // 添加对错图标
+            let icon = input.nextElementSibling;
+            if(icon && icon.classList.contains('ws-grade-icon')) icon.remove();
+            icon = document.createElement('span');
+            icon.className = 'ws-grade-icon';
+            icon.textContent = isRight ? '✓' : '✗';
+            icon.style.color = isRight ? '#4caf50' : '#f44336';
+            input.parentNode.insertBefore(icon, input.nextSibling);
+            if(isRight) correct++;
+        });
+        // 处理 selects
+        (q.answers || []).forEach((answer, si) => {
+            total++;
+            const sel = document.querySelector(`select[data-gkey="${gkey}"][data-qi="${qi}"][data-si="${si}"]`);
+            if(!sel) return;
+            const val = sel.value;
+            if(!val) return;
+            const isRight = val === answer;
+            sel.style.borderColor = isRight ? '#4caf50' : '#f44336';
+            sel.style.backgroundColor = isRight ? '#e8f5e9' : '#ffebee';
+            sel.style.color = isRight ? '#2e7d32' : '#c62828';
+            if(isRight) correct++;
+        });
+    });
+
+    // 显示得分
+    const scoreEl = document.getElementById(`wsScore_${gkey}`);
+    if(scoreEl){
+        const pct = total > 0 ? Math.round(correct/total*100) : 0;
+        scoreEl.innerHTML = `<span class="ws-score ${pct>=60?'good':'bad'}">${correct}/${total}（${pct}%）</span>`;
+    }
+
+    // 保存判卷结果
+    saveDraft();
+    return {correct, total};
+}
+
+function checkAnswer(val, answer, acceptAlt){
+    if(!val || !answer) return false;
+    // 精确匹配
+    if(val === answer) return true;
+    // 忽略空格和大小写
+    if(val.replace(/\s/g,'').toLowerCase() === answer.replace(/\s/g,'').toLowerCase()) return true;
+    // 允许相近答案（用/分隔的可选答案）
+    if(acceptAlt && answer.includes('/')){
+        const alts = answer.split('/');
+        if(alts.some(a => val.replace(/\s/g,'').toLowerCase() === a.replace(/\s/g,'').toLowerCase())) return true;
+    }
+    return false;
+}
+
+// ============ 任务单：收集数据 ============
+function collectWorksheetData(gkey){
+    const ws = WORKSHEET_DATA[gkey];
+    if(!ws) return null;
+    const result = {};
+    ws.questions.forEach((q, qi) => {
+        const key = `q${qi}`;
+        const vals = [];
+        // 收集所有 blanks
+        document.querySelectorAll(`input[data-gkey="${gkey}"][data-qi="${qi}"]`).forEach(b => vals.push({type:'blank', value:b.value.trim()}));
+        // 收集所有 selects
+        document.querySelectorAll(`select[data-gkey="${gkey}"][data-qi="${qi}"]`).forEach(s => vals.push({type:'select', value:s.value}));
+        result[key] = vals;
+    });
+    return result;
+}
 
 // ============ 版本刷新（自动清除浏览器缓存）============
-(function(){const v='240609B';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
+(function(){const v='240609C';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
 
 // ============ 初始化 ============
 window.addEventListener('DOMContentLoaded',()=>{
@@ -545,6 +878,7 @@ function renderMainApp(){
     document.getElementById('groupCardContainer').innerHTML=`
     <div class="group-card"><div class="group-header" style="background:${g.gradient}"><span class="group-icon">${g.icon}</span><span class="group-name">${g.name} · 第${currentGroupNum}小组</span></div><div class="group-body">
         ${guide}
+        ${renderWorksheet()}
         <div class="task-section"><div class="task-title"><span class="emoji">📸</span>任务一：${g.task1.title}</div>
             <div class="upload-area" id="uploadArea" onclick="triggerUpload()"><div class="upload-icon">📤</div><div class="upload-text">点击此处上传图片</div></div>
             <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="handleFileUpload(event)">
@@ -559,7 +893,7 @@ function renderMainApp(){
             <div class="conclusion-section"><div class="conclusion-label">📋 综合结论</div><textarea class="answer-textarea" id="conclusionAnswer" placeholder="${g.task2.conclusionPH}" oninput="autoSaveDraft()"></textarea></div>
         </div>
     </div></div>`;
-    refreshWall(); loadDraft();
+    refreshWall(); loadDraft(); restoreWorksheetDraft();
 }
 
 // ============ 图片上传 ============
@@ -802,6 +1136,7 @@ function collectData(){
         west:document.getElementById('westAnswer')?.value||'',
         east:document.getElementById('eastAnswer')?.value||'',
         conclusion:document.getElementById('conclusionAnswer')?.value||'',
+        worksheet: collectWorksheetData(currentGroup),
         images:imagesForSubmit
     };
 }
@@ -983,24 +1318,111 @@ function enterPresentation(){
     try{document.documentElement.requestFullscreen?.();}catch(e){}
 }
 
+// 展示模式：当前显示的任务Tab（1=填空答案，2=铁路影响分析）
+let presTaskTab = 1;
+
 function renderPresSlide(){
     const g=presGroups[presGroupIdx];if(!g)return;
     // ★ 先清空上一次的图片，防止切换小组时闪现旧图
     const imgEl=document.getElementById('presImage');
     if(imgEl){imgEl.src='';imgEl.style.display='none';}
     const go=GROUPS[g.group_key]||GROUPS.terrain;
-    // 右侧文字
+    // ★ 右侧：Tab切换 + 内容区
     document.getElementById('presRight').innerHTML=`
         <div class="pres-group-badge">${g.group_icon||''} ${g.group_name} · 第${g.group_num}小组</div>
-        ${g.feature?`<div class="pres-text-field"><div class="pres-text-label">${go.task1?.featureLabel||'特征归纳'}</div><div class="pres-text-value">${g.feature}</div></div>`:''}
-        ${g.west?`<div class="pres-text-field"><div class="pres-text-label">🔹 西部分析</div><div class="pres-text-value">${g.west}</div></div>`:''}
-        ${g.east?`<div class="pres-text-field"><div class="pres-text-label">🔸 东部分析</div><div class="pres-text-value">${g.east}</div></div>`:''}
-        ${g.conclusion?`<div class="pres-text-field"><div class="pres-text-label">📋 综合结论</div><div class="pres-text-value">${g.conclusion}</div></div>`:''}`;
-    // 左侧图片
+        <div class="pres-task-tabs">
+            <button class="pres-tab-btn ${presTaskTab===1?'active':''}" onclick="switchPresTab(1)">📋 任务一 · 填空答案</button>
+            <button class="pres-tab-btn ${presTaskTab===2?'active':''}" onclick="switchPresTab(2)">🚂 任务二 · 铁路影响</button>
+        </div>
+        <div class="pres-tab-content ${presTaskTab===1?'active':''}" id="presTab1">
+            ${renderPresWorksheetGrid()}
+        </div>
+        <div class="pres-tab-content ${presTaskTab===2?'active':''}" id="presTab2">
+            ${g.feature?`<div class="pres-text-field"><div class="pres-text-label">${go.task1?.featureLabel||'特征归纳'}</div><div class="pres-text-value">${g.feature}</div></div>`:''}
+            ${g.west?`<div class="pres-text-field"><div class="pres-text-label">🔹 西部分析</div><div class="pres-text-value">${g.west}</div></div>`:''}
+            ${g.east?`<div class="pres-text-field"><div class="pres-text-label">🔸 东部分析</div><div class="pres-text-value">${g.east}</div></div>`:''}
+            ${g.conclusion?`<div class="pres-text-field"><div class="pres-text-label">📋 综合结论</div><div class="pres-text-value">${g.conclusion}</div></div>`:''}
+        </div>`;
+    // 左侧图片（固定不变，不随Tab切换）
     renderPresImage();
     // 更新控件
     document.getElementById('presGroupCounter').textContent=`${presGroupIdx+1}/${presGroups.length}`;
     document.getElementById('presGroupSelect').value=presGroupIdx;
+}
+
+function switchPresTab(tab){
+    presTaskTab = tab;
+    document.querySelectorAll('.pres-tab-btn').forEach((b,i) => b.classList.toggle('active', i+1===tab));
+    document.querySelectorAll('.pres-tab-content').forEach((c,i) => c.classList.toggle('active', i+1===tab));
+}
+
+function renderPresWorksheetGrid(){
+    // 收集所有小组的任务单数据，按组别（terrain/climate/river）分类展示
+    var html = '<div class="pres-ws-grid">';
+    var groupKeys = ['terrain','climate','river'];
+    groupKeys.forEach(function(gkey){
+        var ws = WORKSHEET_DATA[gkey];
+        if(!ws) return;
+        var matchedGroup = null;
+        for(var pi=0; pi<presGroups.length; pi++){
+            if(presGroups[pi].group_key === gkey){matchedGroup = presGroups[pi]; break;}
+        }
+        html = html + '<div class="pres-ws-group ' + ws.cls + '">' +
+                 '<div class="pres-ws-gname">' + ws.icon + ' ' + ws.label + '</div>';
+
+        ws.questions.forEach(function(q, qi){
+            var userAnswers = [];
+            try{userAnswers = (matchedGroup && matchedGroup.worksheet && matchedGroup.worksheet['q'+qi]) || [];}catch(e){}
+            var answerText = q.text;
+
+            // 替换 {blank}
+            var bIdx = 0;
+            answerText = answerText.replace(/\{blank\}/g, function(){
+                var val = '';
+                try{val = (userAnswers[bIdx] && userAnswers[bIdx].value) || '';}catch(e){}
+                var correct = (q.blanks || [])[bIdx];
+                bIdx++;
+                if(val){
+                    var isRight = checkAnswer(val, correct, q.acceptAlt);
+                    var result = '<span class="pres-ws-answer ' + (isRight ? 'correct' : 'wrong') + '">' + val;
+                    if(!isRight){
+                        result = result + '<span style="color:#ff8a80;font-size:11px;margin-left:3px;">(应为:' + correct + ')</span>';
+                    }
+                    result = result + '</span>';
+                    return result;
+                }
+                return '<span class="pres-ws-empty">___</span>';
+            });
+
+            // 替换 {select:...}
+            var sIdx = 0;
+            answerText = answerText.replace(/\{select:[^}]+\}/g, function(){
+                var selLen = (q.selects && q.selects.length) || 0;
+                var idx = userAnswers.length - selLen + sIdx;
+                var val = '';
+                try{val = (userAnswers[idx] && userAnswers[idx].value) || '';}catch(e){}
+                sIdx++;
+                if(val){
+                    var correctAns = (q.answers || [])[sIdx-1] || '';
+                    var isRight = checkAnswer(val, correctAns, q.acceptAlt);
+                    var result = '<span class="pres-ws-answer ' + (isRight ? 'correct' : 'wrong') + '">' + val;
+                    if(!isRight){
+                        result = result + '<span style="color:#ff8a80;font-size:11px;margin-left:3px;">(应为:' + correctAns + ')</span>';
+                    }
+                    result = result + '</span>';
+                    return result;
+                }
+                return '<span class="pres-ws-empty">(未选)</span>';
+            });
+
+            html = html + '<div class="pres-ws-row"><span class="pres-ws-qlabel">' + (qi+1) + '.</span> ' + answerText + '</div>';
+        });
+
+        if(!matchedGroup) html = html + '<div class="pres-ws-row pres-ws-empty">暂无该组提交的数据</div>';
+        html = html + '</div>';
+    });
+    html = html + '</div>';
+    return html;
 }
 
 function renderPresImage(){
@@ -1168,7 +1590,25 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
 let _saveTimer=null;
 function autoSaveDraft(){if(_saveTimer)clearTimeout(_saveTimer);_saveTimer=setTimeout(()=>{saveDraft();},800);}
 function saveDraft(){if(!currentGroup)return;try{const d=collectData();d.imageUrls=imageUrls.slice();localStorage.setItem(`draft_${currentGroup}_${currentGroupNum}`,JSON.stringify(d));}catch(e){}}
-function loadDraft(){try{const data=JSON.parse(localStorage.getItem(`draft_${currentGroup}_${currentGroupNum}`)||'null');if(!data)return false;if(data.feature)document.getElementById('featureAnswer').value=data.feature;if(data.west)document.getElementById('westAnswer').value=data.west;if(data.east)document.getElementById('eastAnswer').value=data.east;if(data.conclusion)document.getElementById('conclusionAnswer').value=data.conclusion;if(data.images&&data.images.length){uploadedImages=data.images;updateUploadArea();}if(data.imageUrls&&data.imageUrls.length){imageUrls=data.imageUrls;}return true;}catch(e){return false;}}
+function loadDraft(){try{const data=JSON.parse(localStorage.getItem(`draft_${currentGroup}_${currentGroupNum}`)||'null');if(!data)return false;if(data.feature)document.getElementById('featureAnswer').value=data.feature;if(data.west)document.getElementById('westAnswer').value=data.west;if(data.east)document.getElementById('eastAnswer').value=data.east;if(data.conclusion)document.getElementById('conclusionAnswer').value=data.conclusion;if(data.worksheet)restoreWorksheetData(data.worksheet);if(data.images&&data.images.length){uploadedImages=data.images;updateUploadArea();}if(data.imageUrls&&data.imageUrls.length){imageUrls=data.imageUrls;}return true;}catch(e){return false;}}
+function restoreWorksheetData(wsData){
+    if(!wsData || !currentGroup) return;
+    Object.keys(wsData).forEach(qKey => {
+        const vals = wsData[qKey];
+        if(!Array.isArray(vals)) return;
+        const qi = parseInt(qKey.replace('q',''));
+        vals.forEach((v, idx) => {
+            if(v.type === 'blank'){
+                const input = document.querySelector(`input[data-gkey="${currentGroup}"][data-qi="${qi}"][data-bi="${idx}"]`);
+                if(input && v.value) input.value = v.value;
+            } else if(v.type === 'select'){
+                const sel = document.querySelector(`select[data-gkey="${currentGroup}"][data-qi="${qi}"][data-si="${idx}"]`);
+                if(sel && v.value) sel.value = v.value;
+            }
+        });
+    });
+}
+function restoreWorksheetDraft(){try{const data=JSON.parse(localStorage.getItem(`draft_${currentGroup}_${currentGroupNum}`)||'null');if(data&&data.worksheet)restoreWorksheetData(data.worksheet);}catch(e){}}
 function restoreDraft(){const ok=loadDraft();if(ok)showNotification('✅ 已恢复上次编辑的内容');}
 setInterval(()=>{if(currentGroup)saveDraft();},30000);
 
