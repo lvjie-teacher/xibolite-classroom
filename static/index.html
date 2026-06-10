@@ -377,6 +377,12 @@
         .t2-aspect { font-weight: 600; color: #333; }
         .t2-west { background: #f9fcff; }
         .t2-east { background: #fff9f9; }
+        /* ★ 导致的主要难题：行高大一倍 */
+        .t2-row-large td { vertical-align: top; }
+        .t2-row-large .t2-textarea { min-height: 220px; padding: 14px; font-size: 15px; line-height: 1.7; }
+        /* ★ 提示语单独第四行 */
+        .t2-hint-row td { background: #faf8ff; }
+        .t2-hint-block { background: #eee8ff; border-left: 4px solid #7c4dff; padding: 10px 14px; border-radius: 6px; font-size: 12px; color: #444; line-height: 1.6; }
         .t2-textarea { width: 100%; min-height: 180px; border: 1px solid #ddd; border-radius: 8px; padding: 12px; font-size: 14px; line-height: 1.6; font-family: inherit; resize: vertical; outline: none; box-sizing: border-box; display: block; word-break: break-word; }
         /* 平板适配：缩小字体和padding，保持三列 */
         @media (max-width: 768px) {
@@ -653,26 +659,40 @@ function renderTask2Table() {
     const gkey = currentGroup;
     const td = TASK2_TABLE_DATA[gkey];
     if (!td) return '';
-    
-    const rows = td.aspects.map((asp, ai) => {
-        let hintHtml = '';
+
+    let rowsHtml = '';
+    td.aspects.forEach((asp, ai) => {
+        const hasHint = !!(TASK2_HINTS[gkey] && TASK2_HINTS[gkey][asp]);
         let textareaRows = '4';
-        // 如果该行有提示语，加在左侧【对比方面】列里
-        if (TASK2_HINTS[gkey] && TASK2_HINTS[gkey][asp]) {
-            hintHtml = `<div class="t2-hint">${TASK2_HINTS[gkey][asp]}</div>`;
-            textareaRows = '6'; // 有提示语的行（主要难题）文本框放大
+
+        // 判断是否是"导致的主要难题"那一行
+        const isMainRow = asp.indexOf('主要难题') !== -1;
+
+        if (isMainRow) {
+            // ★ 导致的主要难题：这一行高度大一倍
+            textareaRows = '8';
+            rowsHtml += `<tr class="t2-row-large">
+                <td class="t2-aspect" data-label="对比方面"><strong>${asp}</strong></td>
+                <td class="t2-west" data-label="欧洲部分（西部）"><textarea class="t2-textarea" data-ai="${ai}" data-region="west" rows="${textareaRows}" placeholder="欧洲部分（写清楚主要难题）…" oninput="autoSaveDraft()"></textarea></td>
+                <td class="t2-east" data-label="亚洲部分（东部）"><textarea class="t2-textarea" data-ai="${ai}" data-region="east" rows="${textareaRows}" placeholder="亚洲部分（写清楚主要难题）…" oninput="autoSaveDraft()"></textarea></td>
+            </tr>`;
+            // ★ 提示语单独放第四行（跨三列）
+            if (hasHint) {
+                rowsHtml += `<tr class="t2-hint-row"><td colspan="3">
+                    <div class="t2-hint-block">${TASK2_HINTS[gkey][asp]}</div>
+                </td></tr>`;
+            }
+        } else {
+            // 普通行
+            if (asp.indexOf('湖泊') !== -1) textareaRows = '6';
+            rowsHtml += `<tr>
+                <td class="t2-aspect" data-label="对比方面"><strong>${asp}</strong></td>
+                <td class="t2-west" data-label="欧洲部分（西部）"><textarea class="t2-textarea" data-ai="${ai}" data-region="west" rows="${textareaRows}" placeholder="欧洲部分…" oninput="autoSaveDraft()"></textarea></td>
+                <td class="t2-east" data-label="亚洲部分（东部）"><textarea class="t2-textarea" data-ai="${ai}" data-region="east" rows="${textareaRows}" placeholder="亚洲部分…" oninput="autoSaveDraft()"></textarea></td>
+            </tr>`;
         }
-        // 湖泊的影响 也放大文本框
-        if (asp.indexOf('湖泊') !== -1 || asp.indexOf('主要难题') !== -1) {
-            textareaRows = '6';
-        }
-        return `<tr>
-            <td class="t2-aspect" data-label="对比方面"><strong>${asp}</strong>${hintHtml}</td>
-            <td class="t2-west" data-label="欧洲部分（西部）"><textarea class="t2-textarea" data-ai="${ai}" data-region="west" rows="${textareaRows}" placeholder="欧洲部分…" oninput="autoSaveDraft()"></textarea></td>
-            <td class="t2-east" data-label="亚洲部分（东部）"><textarea class="t2-textarea" data-ai="${ai}" data-region="east" rows="${textareaRows}" placeholder="亚洲部分…" oninput="autoSaveDraft()"></textarea></td>
-        </tr>`;
-    }).join('');
-    
+    });
+
     return `<div class="t2-table-wrap">
         <table class="t2-table">
             <thead><tr>
@@ -680,7 +700,7 @@ function renderTask2Table() {
                 <th class="t2-th-west">欧洲部分（西部）</th>
                 <th class="t2-th-east">亚洲部分（东部）</th>
             </tr></thead>
-            <tbody>${rows}</tbody>
+            <tbody>${rowsHtml}</tbody>
         </table>
     </div>`;
 }
@@ -1565,11 +1585,25 @@ function presentGroup(){const data=collectData();const g=GROUPS[currentGroup];co
 async function presentAll(){
     let results={};
     // ★ 优先从 localStorage 加载（存的是 base64，永远可访问）
-    try{const l=JSON.parse(localStorage.getItem('classResults')||'{}');for(const k in l)results[k]=l[k];}catch(e){}
+    try{
+        const l=JSON.parse(localStorage.getItem('classResults')||'{}');
+        for(const k in l){
+            results[k]=l[k];
+        }
+    }catch(e){}
     // 再合并内存数据
     for(const k in sessionResults)results[k]=sessionResults[k];
     // 最后从服务器补充（仅当本地没有时才用服务器数据，因为服务器URL可能已失效）
     if(serverMode){try{const r=await fetch('/api/results?_t='+Date.now());const d=await r.json();for(const k in d)if(!results[k])results[k]=d[k];}catch(e){}}
+    // ★ 调试：检查 images 字段
+    for(const k in results){
+        const r=results[k];
+        if(r && r.images){
+            // 过滤掉空值
+            r.images = r.images.filter(img=>img&&img.length>0);
+            if(r.images.length===0) delete r.images;
+        }
+    }
     const vals=Object.values(results);const g=GROUPS[currentGroup];
     presGroups=vals.length?vals.map(r=>{const g2=GROUPS[r.group_key]||GROUPS.terrain;return{...r,group_key:r.group_key,group_icon:g2.icon,group_name:r.group_name||g2.name,group_num:r.group_num,color:g2.color};}):[{...collectData(),group_key:currentGroup,group_icon:g.icon,group_name:g.name,group_num:currentGroupNum,color:g.color}];
     presGroupIdx=0;enterPresentation();
