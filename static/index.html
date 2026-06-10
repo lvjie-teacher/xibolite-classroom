@@ -1844,6 +1844,9 @@ function renderPresImage(){
         if(canvas){canvas.width=0;canvas.height=0;const ctx=canvas.getContext('2d');if(ctx)ctx.clearRect(0,0,canvas.width,canvas.height);}
         if(wrap)wrap.innerHTML='<div class="pres-no-img">暂无图片</div><img id="presImage" src="" style="display:none"><canvas id="presCanvas"></canvas>';
         presDrawing=false;document.getElementById('presDrawBar').classList.remove('active');document.getElementById('presDrawToggle').classList.remove('active-tool');
+        // ★ 调试：在页面底部显示图片字段状态
+        const dbg=document.getElementById('presDebug');
+        if(dbg){dbg.style.display='block';dbg.textContent='[调试] 当前小组 images 字段：'+(g.images?'有（'+g.images.length+'项）':'无（undefined 或空）';}
         return;
     }
     if(presImgIdx>=imgs.length)presImgIdx=imgs.length-1;if(presImgIdx<0)presImgIdx=0;
