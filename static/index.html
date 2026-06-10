@@ -354,6 +354,24 @@
         .pres-ws-answer.correct { color:#69f0ae; }
         .pres-ws-answer.wrong { color:#ff8a80; text-decoration:line-through; }
         .pres-ws-empty { color:rgba(255,255,255,0.3); font-style:italic; }
+
+        /* ============ 任务二对比表格 ============ */
+        .t2-table-wrap { margin-bottom: 16px; }
+        .t2-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+        .t2-table th, .t2-table td { border: 1px solid #ccc; padding: 8px 10px; text-align: left; vertical-align: top; }
+        .t2-table th { background: #f0f0f0; color: #222; font-weight: 700; text-align: center; border-bottom: 2px solid #999; }
+        .t2-th-aspect { width: 22%; }
+        .t2-th-west { width: 39%; }
+        .t2-th-east { width: 39%; }
+        .t2-aspect { font-weight: 600; color: #333; }
+        .t2-west { background: #f9fcff; }
+        .t2-east { background: #fff9f9; }
+        .t2-textarea { width: 100%; min-height: 48px; border: 1px solid #ddd; border-radius: 6px; padding: 6px 8px; font-size: 13px; font-family: inherit; resize: vertical; outline: none; box-sizing: border-box; }
+        .t2-textarea:focus { border-color: #1a237e; }
+        .t2-conclusion { background: #f3e5f5; border-radius: 8px; padding: 14px; margin-top: 12px; border-left: 4px solid #7b1fa2; }
+        .t2-conclusion-label { font-size: 15px; font-weight: 600; color: #4a148c; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .t2-conclusion-textarea { width: 100%; min-height: 70px; border: 1px solid #ddd; border-radius: 6px; padding: 10px 12px; font-size: 14px; font-family: inherit; resize: vertical; outline: none; }
+        .t2-conclusion-textarea:focus { border-color: #7b1fa2; }
     </style>
 </head>
 <body>
@@ -571,6 +589,76 @@ const WORKSHEET_DATA = {
         ]
     }
 };
+
+// ============ 任务二对比表格数据 ============
+const TASK2_TABLE_DATA = {
+    terrain: {
+        label: '地形组', icon: '🏔️', cls: 'terr',
+        aspects: ['主要地形', '起伏程度', '导致的主要难题']
+    },
+    climate: {
+        label: '气候组', icon: '🌡️', cls: 'clima',
+        aspects: ['冬季寒冷程度', '冬季漫长程度', '导致的主要难题']
+    },
+    river: {
+        label: '河流组', icon: '🌊', cls: 'river',
+        aspects: ['跨越大河的数量', '河面宽度', '导致的主要难题']
+    }
+};
+
+// ============ 任务二：渲染对比表格 ============
+function renderTask2Table() {
+    const gkey = currentGroup;
+    const td = TASK2_TABLE_DATA[gkey];
+    if (!td) return '';
+    const rows = td.aspects.map((asp, ai) => `
+        <tr>
+            <td class="t2-aspect"><strong>${asp}</strong></td>
+            <td class="t2-west"><textarea class="t2-textarea" data-ai="${ai}" data-region="west" placeholder="欧洲部分…" oninput="autoSaveDraft()"></textarea></td>
+            <td class="t2-east"><textarea class="t2-textarea" data-ai="${ai}" data-region="east" placeholder="亚洲部分…" oninput="autoSaveDraft()"></textarea></td>
+        </tr>`).join('');
+    return `<div class="t2-table-wrap">
+        <table class="t2-table">
+            <thead><tr>
+                <th class="t2-th-aspect">对比方面</th>
+                <th class="t2-th-west">欧洲部分（西部）</th>
+                <th class="t2-th-east">亚洲部分（东部）</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+        </table>
+        <div class="t2-conclusion">
+            <div class="t2-conclusion-label">📋 综合结论（写2-3条）</div>
+            <textarea class="t2-conclusion-textarea" id="t2Conclusion" placeholder="结合表格，从${td.label.replace('组','')}角度分析修建铁路的难度差异…" oninput="autoSaveDraft()"></textarea>
+        </div>
+    </div>`;
+}
+
+// 收集任务二表格数据
+function collectTask2Data() {
+    const data = { west: [], east: [], conclusion: '' };
+    document.querySelectorAll('.t2-textarea').forEach(el => {
+        const ai = parseInt(el.dataset.ai);
+        const region = el.dataset.region;
+        if (region === 'west') data.west[ai] = el.value.trim();
+        else data.east[ai] = el.value.trim();
+    });
+    const concEl = document.getElementById('t2Conclusion');
+    if (concEl) data.conclusion = concEl.value.trim();
+    return data;
+}
+
+// 恢复任务二表格数据
+function restoreTask2Data(data) {
+    if (!data) return;
+    document.querySelectorAll('.t2-textarea').forEach(el => {
+        const ai = parseInt(el.dataset.ai);
+        const region = el.dataset.region;
+        if (region === 'west' && data.west && data.west[ai] !== undefined) el.value = data.west[ai];
+        if (region === 'east' && data.east && data.east[ai] !== undefined) el.value = data.east[ai];
+    });
+    const concEl = document.getElementById('t2Conclusion');
+    if (concEl && data.conclusion !== undefined) concEl.value = data.conclusion;
+}
 
 let currentGroup=null, currentGroupNum=1, uploadedImages=[], imageUrls=[], uploadedNames=[];
 let viewerImages=[], viewerIndex=0, zoomLevel=1;
@@ -1019,9 +1107,8 @@ function renderMainApp(){
             </div>
         </div>
         <div class="task-section"><div class="task-title"><span class="emoji">🚂</span>任务二：从${g.name.replace('组','')}角度比较在亚洲部分和欧洲部分修建西伯利亚大铁路的难度</div>
-            <div class="tip-box"><div class="tip-label">💡 分别从俄罗斯<strong>欧洲部分（西部）</strong>和<strong>亚洲部分（东部）</strong>两个区域进行分析和比较</div></div>
-            <div class="region-analysis"><div class="region-card west"><div class="region-label">${g.task2.westTitle}</div><textarea class="answer-textarea" id="westAnswer" placeholder="${g.task2.westPH}" oninput="autoSaveDraft()"></textarea></div><div class="region-card east"><div class="region-label">${g.task2.eastTitle}</div><textarea class="answer-textarea" id="eastAnswer" placeholder="${g.task2.eastPH}" oninput="autoSaveDraft()"></textarea></div></div>
-            <div class="conclusion-section"><div class="conclusion-label">📋 综合结论</div><textarea class="answer-textarea" id="conclusionAnswer" placeholder="${g.task2.conclusionPH}" oninput="autoSaveDraft()"></textarea></div>
+            <div class="tip-box"><div class="tip-label">💡 结合下方对比表格，分别从俄罗斯<strong>欧洲部分（西部）</strong>和<strong>亚洲部分（东部）</strong>两个区域进行分析，并写2-3条综合结论</div></div>
+            ${renderTask2Table()}
         </div>
     </div></div>`;
     refreshWall(); loadDraft(); restoreWorksheetDraft();
@@ -1247,9 +1334,7 @@ function collectData(){
         group_icon:g.icon,
         group_num:currentGroupNum,
         feature:document.getElementById('featureAnswer')?.value||'',
-        west:document.getElementById('westAnswer')?.value||'',
-        east:document.getElementById('eastAnswer')?.value||'',
-        conclusion:document.getElementById('conclusionAnswer')?.value||'',
+        task2: collectTask2Data(),
         worksheet: collectWorksheetData(currentGroup),
         images:imagesForSubmit,
         imageNames:uploadedNames.slice()
@@ -1259,7 +1344,12 @@ function collectData(){
 async function submitResult(){
     const data=collectData();
     const wsFilled=data.worksheet&&Object.values(data.worksheet).some(arr=>arr.some(v=>v.value));
-    const has=data.images.length>0||wsFilled||data.feature||data.west||data.east||data.conclusion;
+    const task2Filled = data.task2 && (
+        data.task2.west.some(v=>v) ||
+        data.task2.east.some(v=>v) ||
+        data.task2.conclusion
+    );
+    const has=data.images.length>0||wsFilled||data.feature||task2Filled;
     if(!has){showNotification('请先完成任务内容再提交');return;}
     if(!confirm('确认提交成果？提交后其他同学刷新即可看到'))return;
 
@@ -1566,10 +1656,61 @@ function renderPresWorksheetGrid(){
         });
 
         html += '</div>';
+
+        // ★ 添加任务二对比表格的展示
+        const td = TASK2_TABLE_DATA[gkey];
+        if(td && entry.task2){
+            html += '<div class="pres-t2-block">';
+            html += '<div class="pres-t2-title">🚂 任务二：对比分析</div>';
+            html += '<table class="pres-t2-table">';
+            html += '<tr><th class="pres-t2-th-aspect">对比方面</th><th class="pres-t2-th-west">欧洲部分（西部）</th><th class="pres-t2-th-east">亚洲部分（东部）</th></tr>';
+            td.aspects.forEach(function(asp, ai){
+                const wVal = (entry.task2.west && entry.task2.west[ai]) || '';
+                const eVal = (entry.task2.east && entry.task2.east[ai]) || '';
+                html += '<tr>';
+                html += '<td class="pres-t2-aspect"><strong>' + asp + '</strong></td>';
+                html += '<td class="pres-t2-west">' + (wVal ? wVal : '<span style="color:rgba(255,255,255,0.3);">未填</span>') + '</td>';
+                html += '<td class="pres-t2-east">' + (eVal ? eVal : '<span style="color:rgba(255,255,255,0.3);">未填</span>') + '</td>';
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            if(entry.task2.conclusion){
+                html += '<div class="pres-t2-conclusion"><div class="pres-t2-conclusion-label">📋 综合结论</div>'
+                       + '<div class="pres-t2-conclusion-value">' + entry.task2.conclusion + '</div></div>';
+            }
+            html += '</div>';
+        }
+
+        html += '</div>';
     });
     html += '</div>';
     return html;
 }
+
+// ★ 展示模式：任务二表格样式（在CSS中添加）
+function addPresT2Styles(){
+    const style = document.createElement('style');
+    style.textContent = `
+        .pres-t2-block { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.15); }
+        .pres-t2-title { font-size: 17px; color: rgba(255,255,255,0.55); margin-bottom: 10px; letter-spacing: 1.5px; font-weight: 600; }
+        .pres-t2-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 10px; }
+        .pres-t2-table th, .pres-t2-table td { border: 1px solid rgba(255,255,255,0.2); padding: 7px 10px; text-align: left; vertical-align: top; }
+        .pres-t2-table th { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); font-weight: 700; text-align: center; }
+        .pres-t2-th-aspect { width: 22%; }
+        .pres-t2-th-west { width: 39%; }
+        .pres-t2-th-east { width: 39%; }
+        .pres-t2-aspect { color: rgba(255,255,255,0.7); }
+        .pres-t2-west { color: rgba(255,255,255,0.9); }
+        .pres-t2-east { color: rgba(255,255,255,0.9); }
+        .pres-t2-conclusion { background: rgba(255,255,255,0.08); border-radius: 8px; padding: 12px; margin-top: 8px; }
+        .pres-t2-conclusion-label { font-size: 15px; color: rgba(255,255,255,0.55); margin-bottom: 6px; letter-spacing: 1.5px; font-weight: 600; }
+        .pres-t2-conclusion-value { font-size: 26px; line-height: 2.0; color: rgba(255,255,255,0.98); font-weight: 500; }
+    `;
+    document.head.appendChild(style);
+}
+// 初始化时添加样式
+addPresT2Styles();
+
 // ★ 点击右侧某组卡片 → 左侧切换为该组的图片
 function switchPresGroupTo(groupId){
     if(!groupId) return;
@@ -1780,7 +1921,7 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
 let _saveTimer=null;
 function autoSaveDraft(){if(_saveTimer)clearTimeout(_saveTimer);_saveTimer=setTimeout(()=>{saveDraft();},800);}
 function saveDraft(){if(!currentGroup)return;try{const d=collectData();d.imageUrls=imageUrls.slice();d.uploadedNames=uploadedNames.slice();localStorage.setItem(`draft_${currentGroup}_${currentGroupNum}`,JSON.stringify(d));}catch(e){}}
-function loadDraft(){try{const data=JSON.parse(localStorage.getItem(`draft_${currentGroup}_${currentGroupNum}`)||'null');if(!data)return false;const fa=document.getElementById('featureAnswer');if(data.feature&&fa)fa.value=data.feature;if(data.west)document.getElementById('westAnswer').value=data.west;if(data.east)document.getElementById('eastAnswer').value=data.east;if(data.conclusion)document.getElementById('conclusionAnswer').value=data.conclusion;if(data.worksheet)restoreWorksheetData(data.worksheet);if(data.images&&data.images.length){uploadedImages=data.images;updateUploadArea();}if(data.imageUrls&&data.imageUrls.length){imageUrls=data.imageUrls;}if(data.uploadedNames&&data.uploadedNames.length){uploadedNames=data.uploadedNames;}return true;}catch(e){return false;}}
+function loadDraft(){try{const data=JSON.parse(localStorage.getItem(`draft_${currentGroup}_${currentGroupNum}`)||'null');if(!data)return false;const fa=document.getElementById('featureAnswer');if(data.feature&&fa)fa.value=data.feature;if(data.task2)restoreTask2Data(data.task2);if(data.worksheet)restoreWorksheetData(data.worksheet);if(data.images&&data.images.length){uploadedImages=data.images;updateUploadArea();}if(data.imageUrls&&data.imageUrls.length){imageUrls=data.imageUrls;}if(data.uploadedNames&&data.uploadedNames.length){uploadedNames=data.uploadedNames;}return true;}catch(e){return false;}}
 function restoreWorksheetData(wsData){
     if(!wsData || !currentGroup) return;
     Object.keys(wsData).forEach(qKey => {
