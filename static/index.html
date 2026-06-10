@@ -1374,11 +1374,14 @@ async function clearAllData(){
 function collectData(){
     const g=GROUPS[currentGroup];
     // 关键：images字段优先使用服务器URL（其他设备可访问），降级使用base64
+    // ★ images：始终返回 base64（用于 localStorage，永远可访问）
+    const imagesLocal = uploadedImages.filter(img=>img&&img.length>0);
+    // imagesForSubmit：服务器提交时优先用URL（仅在 submitResult 里使用）
     const imagesForSubmit=uploadedImages.map((img,i)=>{
-        if(imageUrls[i])return imageUrls[i]; // 有服务器URL就用URL
-        if(img.startsWith('/uploads/')||img.startsWith('http'))return img; // 已经是URL
-        return img; // 降级：用base64（服务器端会自动转换为文件）
-    }).filter(img=>img&&img.length>0); // ★ 过滤掉空图片，防止未上传时混入脏数据
+        if(imageUrls[i])return imageUrls[i];
+        if(img.startsWith('/uploads/')||img.startsWith('http'))return img;
+        return img;
+    }).filter(img=>img&&img.length>0);
     return{
         group_id:`${currentGroup}_${currentGroupNum}`,
         group_key:currentGroup,
@@ -1388,7 +1391,8 @@ function collectData(){
         feature:document.getElementById('featureAnswer')?.value||'',
         task2: collectTask2Data(),
         worksheet: collectWorksheetData(currentGroup),
-        images:imagesForSubmit,
+        images:imagesLocal,
+        imagesForSubmit:imagesForSubmit,
         imageNames:uploadedNames.slice()
     };
 }
@@ -1409,7 +1413,10 @@ async function submitResult(){
 
     // 1. 本地内存存储（100%可靠）
     const t=new Date().toLocaleString('zh-CN');
-    const full={...data,submit_time:t};
+    // ★ localStorage 始终存 base64，不存服务器URL（Render不持久化上传文件）
+    const imagesForLocal = uploadedImages.filter(img=>img&&img.length>0);
+    const full={...data,submit_time:t, images:imagesForLocal};
+    delete full.imagesForSubmit; // ★ 删除多余字段，节省 localStorage 空间
     sessionResults[data.group_id]=full;
 
     // 2. localStorage降级存储
@@ -1423,10 +1430,13 @@ async function submitResult(){
     let serverOk=false;
     if(serverMode){
         try{
+            // ★ 服务器提交用 imagesForSubmit（优先URL，减少负载）
+            const dataForServer={...data,images:data.imagesForSubmit};
+            delete dataForServer.imagesForSubmit;
             const r=await fetch('/api/submit',{
                 method:'POST',
                 headers:{'Content-Type':'application/json'},
-                body:JSON.stringify(data)
+                body:JSON.stringify(dataForServer)
             });
             const d=await r.json();
             if(d.status==='ok'){
@@ -1436,7 +1446,8 @@ async function submitResult(){
                     for(let i=0;i<d.image_urls.length&&i<uploadedImages.length;i++){
                         if(d.image_urls[i]){
                             imageUrls[i]=d.image_urls[i];
-                            uploadedImages[i]=d.image_urls[i];
+                            // ★ 不再覆盖 uploadedImages[i]，保留 base64 原文
+                            // uploadedImages[i] 始终保持 base64，本地展示永远可用
                         }
                     }
                 }
@@ -1552,11 +1563,13 @@ function openViewerFromWall(gid,idx){let r=cachedResults[gid];if(!r)try{r=JSON.p
 // ============ 展示模式 ============
 function presentGroup(){const data=collectData();const g=GROUPS[currentGroup];const wsFilled=data.worksheet&&Object.values(data.worksheet).some(arr=>arr.some(v=>v.value));if(!(wsFilled||data.images.length>0)){showNotification('请先完成填空探究学案再展示');return;}presGroups=[{...data,group_key:currentGroup,group_icon:g.icon,group_name:g.name,group_num:currentGroupNum,color:g.color}];presGroupIdx=0;enterPresentation();}
 async function presentAll(){
-    let results={};if(serverMode){try{const r=await fetch('/api/results?_t='+Date.now());results=await r.json();}catch(e){}}
-    if(!serverMode){
+    let results={};
+    // ★ 优先从 localStorage 加载（存的是 base64，永远可访问）
+    try{const l=JSON.parse(localStorage.getItem('classResults')||'{}');for(const k in l)results[k]=l[k];}catch(e){}
+    // 再合并内存数据
     for(const k in sessionResults)results[k]=sessionResults[k];
-    try{const l=JSON.parse(localStorage.getItem('classResults')||'{}');for(const k in l)if(!results[k])results[k]=l[k];}catch(e){}
-    }
+    // 最后从服务器补充（仅当本地没有时才用服务器数据，因为服务器URL可能已失效）
+    if(serverMode){try{const r=await fetch('/api/results?_t='+Date.now());const d=await r.json();for(const k in d)if(!results[k])results[k]=d[k];}catch(e){}}
     const vals=Object.values(results);const g=GROUPS[currentGroup];
     presGroups=vals.length?vals.map(r=>{const g2=GROUPS[r.group_key]||GROUPS.terrain;return{...r,group_key:r.group_key,group_icon:g2.icon,group_name:r.group_name||g2.name,group_num:r.group_num,color:g2.color};}):[{...collectData(),group_key:currentGroup,group_icon:g.icon,group_name:g.name,group_num:currentGroupNum,color:g.color}];
     presGroupIdx=0;enterPresentation();
@@ -1814,6 +1827,8 @@ function renderPresImage(){
         zoomWrapEl.style.top = '0px';
         zoomWrapEl.style.width = Math.round(wrap.clientWidth * presZoom) + 'px';
         zoomWrapEl.style.height = Math.round(wrap.clientHeight * presZoom) + 'px';
+    imgEl.onload=function(){const e=document.getElementById('presImgError');if(e)e.style.display='none';};
+    imgEl.onerror=function(){imgEl.style.display='none';const w=imgEl.parentNode;let e=document.getElementById('presImgError');if(!e){e=document.createElement('div');e.id='presImgError';e.style.cssText='color:#ff6b6b;font-size:14px;text-align:center;padding:20px;';w.appendChild(e);}e.textContent='⚠️ 图片加载失败，可能服务器文件已丢失';e.style.display='block';};
     imgEl.src=imgs[presImgIdx];imgEl.style.display='block';imgEl.style.transform='none';
     navEl.style.display='flex';
     document.getElementById('presImgCounter').textContent=`${presImgIdx+1} / ${imgs.length}`;
