@@ -376,8 +376,8 @@
         .t2-aspect { font-weight: 600; color: #333; }
         .t2-west { background: #f9fcff; }
         .t2-east { background: #fff9f9; }
-        .t2-textarea { width: 100%; min-height: 48px; border: 1px solid #ddd; border-radius: 6px; padding: 6px 8px; font-size: 13px; font-family: inherit; resize: vertical; outline: none; box-sizing: border-box; }
-        .t2-textarea:focus { border-color: #1a237e; }
+        .t2-textarea { width: 100%; min-height: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 12px; font-size: 14px; line-height: 1.6; font-family: inherit; resize: vertical; outline: none; box-sizing: border-box; display: block; }
+        .t2-textarea:focus { border-color: #1a237e; border-width: 2px; }
         .t2-conclusion { background: #f3e5f5; border-radius: 8px; padding: 14px; margin-top: 12px; border-left: 4px solid #7b1fa2; }
         .t2-conclusion-label { font-size: 15px; font-weight: 600; color: #4a148c; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
         .t2-conclusion-textarea { width: 100%; min-height: 70px; border: 1px solid #ddd; border-radius: 6px; padding: 10px 12px; font-size: 14px; font-family: inherit; resize: vertical; outline: none; }
@@ -639,15 +639,15 @@ function renderTask2Table() {
     
     const rows = td.aspects.map((asp, ai) => {
         let hintHtml = '';
-        let textareaRows = '2';
+        let textareaRows = '3';
         // 如果该行有提示语，加在左侧【对比方面】列里
         if (TASK2_HINTS[gkey] && TASK2_HINTS[gkey][asp]) {
             hintHtml = `<div class="t2-hint">${TASK2_HINTS[gkey][asp]}</div>`;
-            textareaRows = '4'; // 有提示语的行（主要难题）文本框放大
+            textareaRows = '6'; // 有提示语的行（主要难题）文本框放大
         }
         // 湖泊的影响 也放大文本框
         if (asp.indexOf('湖泊') !== -1 || asp.indexOf('主要难题') !== -1) {
-            textareaRows = '4';
+            textareaRows = '6';
         }
         return `<tr>
             <td class="t2-aspect"><strong>${asp}</strong>${hintHtml}</td>
