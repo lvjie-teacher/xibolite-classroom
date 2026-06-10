@@ -610,7 +610,7 @@ const TASK2_TABLE_DATA = {
     },
     river: {
         label: '河流组', icon: '🌊', cls: 'river',
-        aspects: ['跨越大河的数量', '河面宽度', '贝加尔湖的影响', '导致的主要难题']
+        aspects: ['跨越大河的数量', '河面宽度', '湖泊的影响', '导致的主要难题']
     }
 };
 
@@ -625,21 +625,21 @@ function renderTask2Table() {
         terrain: {'导致的主要难题':'提示：可从地势起伏大小、是否需要开挖隧道或填充峡谷等工程角度思考…'},
         climate: {'导致的主要难题':'提示：可从永冻土分布、低温对施工的影响、每年有效施工时间等角度思考…'},
         river:   {
-            '贝加尔湖的影响': '提示：贝加尔湖是世界最深湖，位于西伯利亚南部，思考铁路是绕行还是沿湖修建…',
+            '湖泊的影响': '提示：可从湖泊数量、湖泊深度对铁路修建的影响等角度思考…',
             '导致的主要难题': '提示：可从需要跨越的河流数量、每座桥梁的长度/高度等技术难度角度思考…'
         }
     };
     
     const rows = td.aspects.map((asp, ai) => {
-        let extra = '';
-        // 如果该行有提示语，加上
+        let hintHtml = '';
+        // 如果该行有提示语，加在左侧【对比方面】列里
         if (hints[gkey] && hints[gkey][asp]) {
-            extra = `<div class="t2-hint">${hints[gkey][asp]}</div>`;
+            hintHtml = `<div class="t2-hint">${hints[gkey][asp]}</div>`;
         }
         return `<tr>
-            <td class="t2-aspect"><strong>${asp}</strong></td>
-            <td class="t2-west"><textarea class="t2-textarea" data-ai="${ai}" data-region="west" placeholder="欧洲部分…" oninput="autoSaveDraft()"></textarea>${extra}</td>
-            <td class="t2-east"><textarea class="t2-textarea" data-ai="${ai}" data-region="east" placeholder="亚洲部分…" oninput="autoSaveDraft()"></textarea>${extra}</td>
+            <td class="t2-aspect"><strong>${asp}</strong>${hintHtml}</td>
+            <td class="t2-west"><textarea class="t2-textarea" data-ai="${ai}" data-region="west" placeholder="欧洲部分…" oninput="autoSaveDraft()"></textarea></td>
+            <td class="t2-east"><textarea class="t2-textarea" data-ai="${ai}" data-region="east" placeholder="亚洲部分…" oninput="autoSaveDraft()"></textarea></td>
         </tr>`;
     }).join('');
     
