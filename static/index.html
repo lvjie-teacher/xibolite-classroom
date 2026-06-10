@@ -1659,32 +1659,6 @@ function renderPresWorksheetGrid(){
         });
 
         html += '</div>';
-
-        // ★ 添加任务二对比表格的展示
-        const td = TASK2_TABLE_DATA[gkey];
-        if(td && entry.task2){
-            html += '<div class="pres-t2-block">';
-            html += '<div class="pres-t2-title">🚂 任务二：对比分析</div>';
-            html += '<table class="pres-t2-table">';
-            html += '<tr><th class="pres-t2-th-aspect">对比方面</th><th class="pres-t2-th-west">欧洲部分（西部）</th><th class="pres-t2-th-east">亚洲部分（东部）</th></tr>';
-            td.aspects.forEach(function(asp, ai){
-                const wVal = (entry.task2.west && entry.task2.west[ai]) || '';
-                const eVal = (entry.task2.east && entry.task2.east[ai]) || '';
-                html += '<tr>';
-                html += '<td class="pres-t2-aspect"><strong>' + asp + '</strong></td>';
-                html += '<td class="pres-t2-west">' + (wVal ? wVal : '<span style="color:rgba(255,255,255,0.3);">未填</span>') + '</td>';
-                html += '<td class="pres-t2-east">' + (eVal ? eVal : '<span style="color:rgba(255,255,255,0.3);">未填</span>') + '</td>';
-                html += '</tr>';
-            });
-            html += '</tbody></table>';
-            if(entry.task2.conclusion){
-                html += '<div class="pres-t2-conclusion"><div class="pres-t2-conclusion-label">📋 综合结论</div>'
-                       + '<div class="pres-t2-conclusion-value">' + entry.task2.conclusion + '</div></div>';
-            }
-            html += '</div>';
-        }
-
-        html += '</div>';
     });
     html += '</div>';
     return html;
@@ -1755,8 +1729,8 @@ function addPresT2Styles(){
         .pres-t2-th-east { min-width: 100px; }
         .pres-t2-aspect { color: rgba(255,255,255,0.7); font-size: 12px; }
         .pres-t2-aspect strong { font-size: 13px; }
-        .pres-t2-west { color: rgba(255,255,255,0.9); font-size: 13px; }
-        .pres-t2-east { color: rgba(255,255,255,0.9); font-size: 13px; }
+        .pres-t2-west { color: rgba(255,255,255,0.9); font-size: 13px; word-break: break-word; white-space: normal; }
+        .pres-t2-east { color: rgba(255,255,255,0.9); font-size: 13px; word-break: break-word; white-space: normal; }
         .pres-t2-hint { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; line-height: 1.4; }
         .pres-t2-conclusion { background: rgba(255,255,255,0.08); border-radius: 6px; padding: 10px; margin-top: 6px; }
         .pres-t2-conclusion-label { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 4px; letter-spacing: 1.2px; font-weight: 600; }
