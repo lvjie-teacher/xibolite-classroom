@@ -355,6 +355,16 @@
         .pres-ws-answer.wrong { color:#ff8a80; text-decoration:line-through; }
         .pres-ws-empty { color:rgba(255,255,255,0.3); font-style:italic; }
 
+        /* 展示区：任务二 同组多小组纵向罗列 */
+        .pres-t2-grid { display:flex; flex-direction:column; gap:16px; }
+        .pres-t2-group { border-radius:10px; padding:14px 16px; cursor:pointer; transition:all 0.2s; position:relative; margin-bottom:4px; }
+        .pres-t2-group.active { box-shadow:0 0 0 2px rgba(255,255,255,0.5); }
+        .pres-t2-group:hover { filter:brightness(1.15); }
+        .pres-t2-group.terr { background:rgba(99,153,34,0.15); border-left:3px solid #639922; }
+        .pres-t2-group.clima { background:rgba(226,75,74,0.15); border-left:3px solid #E24B4A; }
+        .pres-t2-group.river { background:rgba(55,138,221,0.15); border-left:3px solid #378ADD; }
+        .pres-t2-gname { font-size:15px; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px; color:rgba(255,255,255,0.9); }
+
         /* ============ 任务二对比表格 ============ */
         .t2-table-wrap { margin-bottom: 16px; }
         .t2-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
@@ -619,24 +629,29 @@ function renderTask2Table() {
     
     // 根据不同组生成不同的提示（不写结论，只提示思考方向）
     const hints = {
-        terrain: {'导致的主要难题':'提示：可从地势起伏大小、是否需要开挖隧道或填充峡谷等工程角度思考…'},
-        climate: {'导致的主要难题':'提示：可从永冻土分布、低温对施工的影响、每年有效施工时间等角度思考…'},
+        terrain: {'导致的主要难题':'提示：可从地势起伏大小、是否需要开挖隧道或填充峡谷等工程角度思考，请分条目写（如：①…②…③…）'},
+        climate: {'导致的主要难题':'提示：可从永冻土分布、低温对施工的影响、每年有效施工时间等角度思考，请分条目写（如：①…②…③…）'},
         river:   {
-            '湖泊的影响': '提示：可从湖泊数量、湖泊深度对铁路修建的影响等角度思考…',
-            '导致的主要难题': '提示：可从需要跨越的河流数量、每座桥梁的长度/高度等技术难度角度思考…'
+            '导致的主要难题': '提示：可从需要跨越的河流数量、每座桥梁的长度/高度等技术难度角度思考，请分条目写（如：①…②…③…）'
         }
     };
-    
+
     const rows = td.aspects.map((asp, ai) => {
         let hintHtml = '';
+        let textareaRows = '2';
         // 如果该行有提示语，加在左侧【对比方面】列里
         if (hints[gkey] && hints[gkey][asp]) {
             hintHtml = `<div class="t2-hint">${hints[gkey][asp]}</div>`;
+            textareaRows = '4'; // 有提示语的行（主要难题）文本框放大
+        }
+        // 湖泊的影响 也放大文本框
+        if (asp.indexOf('湖泊') !== -1 || asp.indexOf('主要难题') !== -1) {
+            textareaRows = '4';
         }
         return `<tr>
             <td class="t2-aspect"><strong>${asp}</strong>${hintHtml}</td>
-            <td class="t2-west"><textarea class="t2-textarea" data-ai="${ai}" data-region="west" placeholder="欧洲部分…" oninput="autoSaveDraft()"></textarea></td>
-            <td class="t2-east"><textarea class="t2-textarea" data-ai="${ai}" data-region="east" placeholder="亚洲部分…" oninput="autoSaveDraft()"></textarea></td>
+            <td class="t2-west"><textarea class="t2-textarea" data-ai="${ai}" data-region="west" rows="${textareaRows}" placeholder="欧洲部分…" oninput="autoSaveDraft()"></textarea></td>
+            <td class="t2-east"><textarea class="t2-textarea" data-ai="${ai}" data-region="east" rows="${textareaRows}" placeholder="亚洲部分…" oninput="autoSaveDraft()"></textarea></td>
         </tr>`;
     }).join('');
     
@@ -1674,44 +1689,52 @@ function renderPresWorksheetGrid(){
     return html;
 }
 
-// ★ 展示模式：任务二Tab专用渲染函数
+// ★ 展示模式：任务二Tab专用渲染函数（同组所有小组纵向罗列）
 function renderPresTask2Grid(){
     const curG = presGroups[presGroupIdx];
-    if(!curG || !curG.task2) return '<div style="color:rgba(255,255,255,0.5);padding:20px;">该组尚未提交任务二</div>';
-    
+    if(!curG) return '';
     const gkey = curG.group_key;
     const td = TASK2_TABLE_DATA[gkey];
     if(!td) return '';
-    
-    let html = '<div class="pres-t2-block">';
-    html += '<div class="pres-t2-title">🚂 任务二：对比分析</div>';
-    html += '<div class="pres-t2-scroll">';
-    html += '<table class="pres-t2-table">';
-    html += '<tr><th class="pres-t2-th-aspect">对比方面</th><th class="pres-t2-th-west">欧洲部分（西部）</th><th class="pres-t2-th-east">亚洲部分（东部）</th></tr>';
-    
-    td.aspects.forEach(function(asp, ai){
-        const wVal = (curG.task2.west && curG.task2.west[ai]) || '';
-        const eVal = (curG.task2.east && curG.task2.east[ai]) || '';
-        html += '<tr>';
-        html += '<td class="pres-t2-aspect"><strong>' + asp + '</strong>';
-        // 如果有提示语，显示在左侧列
-        if (hints[gkey] && hints[gkey][asp]) {
-            html += '<div class="pres-t2-hint">' + hints[gkey][asp] + '</div>';
+
+    // 只显示当前组别（如河湖组）下所有提交任务二的小组
+    const sameGroups = presGroups.filter(g => g.group_key === gkey && g.task2);
+    if(!sameGroups.length) return '<div style="color:rgba(255,255,255,0.5);padding:20px;">该组尚未提交任务二</div>';
+
+    let html = '<div class="pres-t2-grid">';
+    sameGroups.forEach(function(entry, ei){
+        const isActive = entry === presGroups[presGroupIdx];
+        html += '<div class="pres-t2-group ' + (isActive ? 'active' : '') + '" onclick="switchPresGroupTo(\'' + (entry.group_id||'') + '\')">';
+        html += '<div class="pres-t2-gname">' + td.icon + ' · ' + td.label.replace('组','') + '第' + (entry.group_num||'?') + '组</div>';
+
+        html += '<div class="pres-t2-scroll">';
+        html += '<table class="pres-t2-table">';
+        html += '<tr><th class="pres-t2-th-aspect">对比方面</th><th class="pres-t2-th-west">欧洲部分（西部）</th><th class="pres-t2-th-east">亚洲部分（东部）</th></tr>';
+
+        td.aspects.forEach(function(asp, ai){
+            const wVal = (entry.task2.west && entry.task2.west[ai]) || '';
+            const eVal = (entry.task2.east && entry.task2.east[ai]) || '';
+            html += '<tr>';
+            html += '<td class="pres-t2-aspect"><strong>' + asp + '</strong>';
+            if (hints[gkey] && hints[gkey][asp]) {
+                html += '<div class="pres-t2-hint">' + hints[gkey][asp] + '</div>';
+            }
+            html += '</td>';
+            html += '<td class="pres-t2-west">' + (wVal ? wVal : '<span style="color:rgba(255,255,255,0.3);">未填</span>') + '</td>';
+            html += '<td class="pres-t2-east">' + (eVal ? eVal : '<span style="color:rgba(255,255,255,0.3);">未填</span>') + '</td>';
+            html += '</tr>';
+        });
+
+        html += '</table>';
+        html += '</div>';
+
+        if(entry.task2.conclusion){
+            html += '<div class="pres-t2-conclusion"><div class="pres-t2-conclusion-label">📋 综合结论</div>'
+                   + '<div class="pres-t2-conclusion-value">' + entry.task2.conclusion + '</div></div>';
         }
-        html += '</td>';
-        html += '<td class="pres-t2-west">' + (wVal ? wVal : '<span style="color:rgba(255,255,255,0.3);">未填</span>') + '</td>';
-        html += '<td class="pres-t2-east">' + (eVal ? eVal : '<span style="color:rgba(255,255,255,0.3);">未填</span>') + '</td>';
-        html += '</tr>';
+
+        html += '</div>';
     });
-    
-    html += '</table>';
-    html += '</div>';
-    
-    if(curG.task2.conclusion){
-        html += '<div class="pres-t2-conclusion"><div class="pres-t2-conclusion-label">📋 综合结论</div>'
-               + '<div class="pres-t2-conclusion-value">' + curG.task2.conclusion + '</div></div>';
-    }
-    
     html += '</div>';
     return html;
 }
