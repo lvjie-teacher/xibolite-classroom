@@ -621,27 +621,28 @@ const TASK2_TABLE_DATA = {
     }
 };
 
+// 任务二提示语（全局，renderTask2Table 和 renderPresTask2Grid 共用）
+const TASK2_HINTS = {
+    terrain: {'导致的主要难题':'提示：可从地势起伏大小、是否需要开挖隧道或填充峡谷等工程角度思考，请分条目写（如：①…②…③…）'},
+    climate: {'导致的主要难题':'提示：可从永冻土分布、低温对施工的影响、每年有效施工时间等角度思考，请分条目写（如：①…②…③…）'},
+    river:   {
+        '湖泊的影响': '',
+        '导致的主要难题': '提示：可从需要跨越的河流数量、每座桥梁的长度/高度等技术难度角度思考，请分条目写（如：①…②…③…）'
+    }
+};
+
 // ============ 任务二：渲染对比表格 ============
 function renderTask2Table() {
     const gkey = currentGroup;
     const td = TASK2_TABLE_DATA[gkey];
     if (!td) return '';
     
-    // 根据不同组生成不同的提示（不写结论，只提示思考方向）
-    const hints = {
-        terrain: {'导致的主要难题':'提示：可从地势起伏大小、是否需要开挖隧道或填充峡谷等工程角度思考，请分条目写（如：①…②…③…）'},
-        climate: {'导致的主要难题':'提示：可从永冻土分布、低温对施工的影响、每年有效施工时间等角度思考，请分条目写（如：①…②…③…）'},
-        river:   {
-            '导致的主要难题': '提示：可从需要跨越的河流数量、每座桥梁的长度/高度等技术难度角度思考，请分条目写（如：①…②…③…）'
-        }
-    };
-
     const rows = td.aspects.map((asp, ai) => {
         let hintHtml = '';
         let textareaRows = '2';
         // 如果该行有提示语，加在左侧【对比方面】列里
-        if (hints[gkey] && hints[gkey][asp]) {
-            hintHtml = `<div class="t2-hint">${hints[gkey][asp]}</div>`;
+        if (TASK2_HINTS[gkey] && TASK2_HINTS[gkey][asp]) {
+            hintHtml = `<div class="t2-hint">${TASK2_HINTS[gkey][asp]}</div>`;
             textareaRows = '4'; // 有提示语的行（主要难题）文本框放大
         }
         // 湖泊的影响 也放大文本框
@@ -1716,8 +1717,8 @@ function renderPresTask2Grid(){
             const eVal = (entry.task2.east && entry.task2.east[ai]) || '';
             html += '<tr>';
             html += '<td class="pres-t2-aspect"><strong>' + asp + '</strong>';
-            if (hints[gkey] && hints[gkey][asp]) {
-                html += '<div class="pres-t2-hint">' + hints[gkey][asp] + '</div>';
+            if (TASK2_HINTS[gkey] && TASK2_HINTS[gkey][asp]) {
+                html += '<div class="pres-t2-hint">' + TASK2_HINTS[gkey][asp] + '</div>';
             }
             html += '</td>';
             html += '<td class="pres-t2-west">' + (wVal ? wVal : '<span style="color:rgba(255,255,255,0.3);">未填</span>') + '</td>';
