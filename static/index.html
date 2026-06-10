@@ -1855,12 +1855,12 @@ function renderPresImage(){
         zoomWrap.appendChild(nEl);
         zoomWrap.appendChild(cvs);
     }
-        zoomWrapEl.style.transform = 'none';
-        zoomWrapEl.style.position = 'absolute';
-        zoomWrapEl.style.left = '0px';
-        zoomWrapEl.style.top = '0px';
-        zoomWrapEl.style.width = Math.round(wrap.clientWidth * presZoom) + 'px';
-        zoomWrapEl.style.height = Math.round(wrap.clientHeight * presZoom) + 'px';
+        zoomWrap.style.transform = 'none';
+        zoomWrap.style.position = 'absolute';
+        zoomWrap.style.left = '0px';
+        zoomWrap.style.top = '0px';
+        zoomWrap.style.width = Math.round(wrap.clientWidth * presZoom) + 'px';
+        zoomWrap.style.height = Math.round(wrap.clientHeight * presZoom) + 'px';
     imgEl.onload=function(){const e=document.getElementById('presImgError');if(e)e.style.display='none';};
     imgEl.onerror=function(){imgEl.style.display='none';const w=imgEl.parentNode;let e=document.getElementById('presImgError');if(!e){e=document.createElement('div');e.id='presImgError';e.style.cssText='color:#ff6b6b;font-size:14px;text-align:center;padding:20px;';w.appendChild(e);}e.textContent='⚠️ 图片加载失败，可能服务器文件已丢失';e.style.display='block';};
     imgEl.src=imgs[presImgIdx];imgEl.style.display='block';imgEl.style.transform='none';
