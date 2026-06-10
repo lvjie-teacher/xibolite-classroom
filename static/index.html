@@ -140,6 +140,7 @@
         .action-btn.present { background: linear-gradient(135deg, #ff9800, #f57c00); color: white; }
         .action-btn.all-present { background: linear-gradient(135deg, #42a5f5, #1e88e5); color: white; }
         .action-btn.submit { background: linear-gradient(135deg, #66bb6a, #43a047); color: white; }
+        .action-btn.eval { background: linear-gradient(135deg, #ab47bc, #8e24aa); color: white; }
         .action-btn.refresh { background: #f5f5f5; color: #666; border: 1px solid #ddd; }
         .action-btn.clear-group { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; padding: 6px 8px; font-size: 11px; }
         .action-btn.clear-all { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; padding: 6px 8px; font-size: 11px; }
@@ -385,11 +386,13 @@
         <div class="achievement-wall">
             <div class="achievement-header"><div class="achievement-header-left">🏆 成果墙</div><button class="refresh-btn" onclick="refreshWall()">🔄 刷新</button></div>
             <div class="achievement-body" id="achievementBody"><div class="achievement-empty">暂无小组提交成果，点击"刷新"查看</div></div>
+            <div id="aiEvalArea" style="display:none;margin-top:12px;padding:14px 16px;background:#f3e5f5;border-radius:12px;border-left:4px solid #8e24aa;"></div>
         </div>
     </main>
     <div class="bottom-actions">
         <button class="action-btn all-present" onclick="presentAll()">🌐 全部展示</button>
         <button class="action-btn submit" onclick="submitResult()">📤 提交成果</button>
+        <button class="action-btn eval" onclick="aiEvaluate()">🤖 AI 点评</button>
         <button class="action-btn refresh" onclick="refreshWall()">🔄 刷新成果</button>
         <button class="action-btn clear-group" onclick="clearGroupData()">🗑 清空本组</button>
         <button class="action-btn clear-all" onclick="clearAllData()">⚠️ 清空全部【仅老师·学生勿点】</button>
@@ -908,7 +911,7 @@ function collectWorksheetData(gkey){
 }
 
 // ============ 版本刷新（自动清除浏览器缓存）============
-(function(){const v='240610A';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
+(function(){const v='240610B';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
 
 // ============ 初始化 ============
 window.addEventListener('DOMContentLoaded',()=>{
@@ -1315,7 +1318,35 @@ async function submitResult(){
     await refreshWall();
 }
 
-// ============ 成果墙 ============
+// ============ AI 智能点评 ============
+async function aiEvaluate(){
+    if(!currentGroup){showNotification('请先进入一个小组');return;}
+    const wsData = collectWorksheetData(currentGroup);
+    if(!wsData || !Object.values(wsData).some(arr => arr.some(v => v.value))){
+        showNotification('⚠️ 请先完成填空探究学案再点评');
+        return;
+    }
+    const area = document.getElementById('aiEvalArea');
+    area.style.display = 'block';
+    area.innerHTML = '<div style="text-align:center;padding:10px;color:#8e24aa;">⏳ AI 正在分析你的答案...</div>';
+    showNotification('🤖 AI 正在点评，请稍候...');
+    try{
+        const r = await fetch('/api/ai_evaluate', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({worksheet:wsData, group_key:currentGroup})
+        });
+        const d = await r.json();
+        if(d.evaluation){
+            area.innerHTML = '<div style="font-size:14px;font-weight:700;color:#6a1b9a;margin-bottom:8px;">🤖 AI 整体点评</div>'
+                + '<div style="font-size:14px;line-height:1.8;color:#333;">' + d.evaluation.replace(/\n/g,'<br>') + '</div>';
+        } else if(d.error){
+            area.innerHTML = '<div style="color:#c62828;font-size:13px;">❌ ' + d.error + '</div>';
+        }
+    }catch(e){
+        area.innerHTML = '<div style="color:#c62828;font-size:13px;">❌ 网络请求失败，请检查连接</div>';
+    }
+}
 async function refreshWall(){
     const body=document.getElementById('achievementBody');
     // 显示正在加载
