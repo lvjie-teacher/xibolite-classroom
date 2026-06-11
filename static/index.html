@@ -383,6 +383,13 @@
         /* ★ 提示语单独第四行 */
         .t2-hint-row td { background: #faf8ff; }
         .t2-hint-block { background: #eee8ff; border-left: 4px solid #7c4dff; padding: 10px 14px; border-radius: 6px; font-size: 12px; color: #444; line-height: 1.6; }
+        /* ★ 难度判断单选行 */
+        .t2-harder-row td { background: #faf8ff; border-top: 2px solid #7c4dff; }
+        .t2-radio-label { display: inline-block; padding: 5px 10px; cursor: pointer; border-radius: 6px; transition: background 0.2s; }
+        .t2-radio-label:hover { background: #eee8ff; }
+        .t2-radio-label input[type="radio"] { margin-right: 4px; }
+        .t2-radio-label span { font-size: 13px; color: #333; font-weight: 500; }
+        .t2-radio-label input[type="radio"]:checked + span { color: #7c4dff; font-weight: 700; }
         .t2-textarea { width: 100%; height: 100%; min-height: 180px; border: 1px solid #ddd; border-radius: 8px; padding: 12px; font-size: 14px; line-height: 1.6; font-family: inherit; resize: vertical; outline: none; box-sizing: border-box; display: block; word-break: break-word; }
         /* 平板适配：缩小字体和padding，保持三列 */
         @media (max-width: 768px) {
@@ -700,7 +707,18 @@ function renderTask2Table() {
                 <th class="t2-th-west">欧洲部分（西部）</th>
                 <th class="t2-th-east">亚洲部分（东部）</th>
             </tr></thead>
-            <tbody>${rowsHtml}</tbody>
+            <tbody>${rowsHtml}
+                <tr class="t2-harder-row">
+                    <td class="t2-aspect" style="text-align:center;"><strong>修建难度更大的部分是？</strong></td>
+                    <td colspan="2" style="text-align:center;padding:12px 10px;">
+                        <label class="t2-radio-label"><input type="radio" name="t2Harder" value="west" onchange="autoSaveDraft()"> <span>欧洲部分（西部）难度更大</span></label>
+                        <span style="margin:0 10px;color:#999;">|</span>
+                        <label class="t2-radio-label"><input type="radio" name="t2Harder" value="east" onchange="autoSaveDraft()"> <span>亚洲部分（东部）难度更大</span></label>
+                        <span style="margin:0 10px;color:#999;">|</span>
+                        <label class="t2-radio-label"><input type="radio" name="t2Harder" value="equal" onchange="autoSaveDraft()"> <span>两者难度相当</span></label>
+                    </td>
+                </tr>
+            </tbody>
         </table>
     </div>`;
 }
@@ -716,6 +734,9 @@ function collectTask2Data() {
     });
     const concEl = document.getElementById('t2Conclusion');
     if (concEl) data.conclusion = concEl.value.trim();
+    // ★ 收集难度判断单选结果
+    const harderEl = document.querySelector('input[name="t2Harder"]:checked');
+    if (harderEl) data.harder = harderEl.value;
     return data;
 }
 
@@ -730,6 +751,11 @@ function restoreTask2Data(data) {
     });
     const concEl = document.getElementById('t2Conclusion');
     if (concEl && data.conclusion !== undefined) concEl.value = data.conclusion;
+    // ★ 恢复难度判断单选结果
+    if (data.harder) {
+        const el = document.querySelector(`input[name="t2Harder"][value="${data.harder}"]`);
+        if (el) el.checked = true;
+    }
 }
 
 let currentGroup=null, currentGroupNum=1, uploadedImages=[], imageUrls=[], uploadedNames=[];
@@ -1774,6 +1800,15 @@ function renderPresTask2Grid(){
                    + '<div class="pres-t2-conclusion-value">' + entry.task2.conclusion + '</div></div>';
         }
 
+        // ★ 显示难度判断结果
+        if(entry.task2 && entry.task2.harder){
+            var harderText = '';
+            if(entry.task2.harder === 'west') harderText = '欧洲部分（西部）修建难度更大';
+            else if(entry.task2.harder === 'east') harderText = '亚洲部分（东部）修建难度更大';
+            else if(entry.task2.harder === 'equal') harderText = '两者难度相当';
+            html += '<div class="pres-t2-harder"><span class="pres-t2-harder-icon">🏆</span> ' + harderText + '</div>';
+        }
+
         html += '</div>';
     });
     html += '</div>';
@@ -1801,6 +1836,8 @@ function addPresT2Styles(){
         .pres-t2-conclusion { background: rgba(255,255,255,0.08); border-radius: 6px; padding: 10px; margin-top: 6px; }
         .pres-t2-conclusion-label { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 4px; letter-spacing: 1.2px; font-weight: 600; }
         .pres-t2-conclusion-value { font-size: 22px; line-height: 1.8; color: rgba(255,255,255,0.98); font-weight: 500; }
+        .pres-t2-harder { background: rgba(124,77,255,0.2); border: 1px solid rgba(124,77,255,0.4); border-radius: 8px; padding: 8px 12px; margin-top: 8px; text-align: center; font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.95); }
+        .pres-t2-harder-icon { font-size: 18px; }
     `;
     document.head.appendChild(style);
 }
