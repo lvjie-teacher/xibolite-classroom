@@ -198,7 +198,7 @@
         /* 展示主体 */
         .pres-main { flex: 1; display: flex; overflow: hidden; }
         .pres-left { flex: 1; display: flex; flex-direction: column; background: #0a0a0a; position: relative; min-width: 0; }
-        .pres-img-wrap { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: auto; cursor: grab; }
+        .pres-img-wrap { flex: 1; position: relative; display: flex; align-items: flex-start; justify-content: flex-start; overflow: auto; cursor: grab; }
         .pres-img-wrap.dragging { cursor: grabbing; }
         .pres-img-wrap img { max-width: 95%; max-height: 95%; object-fit: contain; transition: transform 0.2s; }
         .pres-img-wrap canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
@@ -1914,7 +1914,7 @@ function renderPresImage(){
     if(!zoomWrap){
         zoomWrap = document.createElement('div');
         zoomWrap.id = 'presZoomWrap';
-        zoomWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;transform-origin:center center;';
+        zoomWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;flex-shrink:0;align-self:flex-start;';
         // 将现有图片和画布移入zoomWrap
         const cvs = document.getElementById('presCanvas');
         const img = document.getElementById('presImage');
@@ -1930,9 +1930,9 @@ function renderPresImage(){
         zoomWrap.appendChild(cvs);
     }
         zoomWrap.style.transform = 'none';
-        zoomWrap.style.position = 'absolute';
-        zoomWrap.style.left = '0px';
-        zoomWrap.style.top = '0px';
+        zoomWrap.style.position = 'relative';
+        zoomWrap.style.flexShrink = '0';
+        zoomWrap.style.alignSelf = 'flex-start';
         zoomWrap.style.width = Math.round(wrap.clientWidth * presZoom) + 'px';
         zoomWrap.style.height = Math.round(wrap.clientHeight * presZoom) + 'px';
     imgEl.onload=function(){const e=document.getElementById('presImgError');if(e)e.style.display='none';};
@@ -2091,13 +2091,16 @@ function presShowLibImage(imgUrl){
     presZoom=1;
     const zw=document.createElement('div');
     zw.id='presZoomWrap';
-    zw.style.cssText='display:flex;flex-direction:column;align-items:center;transform-origin:center center;position:absolute;left:0;top:0;width:100%;height:100%;';
+    zw.style.cssText='display:flex;flex-direction:column;align-items:center;flex-shrink:0;align-self:flex-start;position:relative;';
     const parent=imgEl.parentNode;
     const nEl=document.createElement('div');nEl.id='presImgName';nEl.style.cssText='color:white;font-size:16px;font-weight:600;text-align:center;padding:4px 0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
     parent.insertBefore(zw,imgEl);
     zw.appendChild(imgEl);
     zw.appendChild(nEl);
     if(canvas)zw.appendChild(canvas);
+    // 设置 zoomWrap 尺寸，使 overflow:auto 生效
+    zw.style.width = Math.round(wrap.clientWidth) + 'px';
+    zw.style.height = Math.round(wrap.clientHeight) + 'px';
     // 重置缩放
     if(canvas){canvas.width=Math.round(wrap.clientWidth*presZoom);canvas.height=Math.round(wrap.clientHeight*presZoom);const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);}
     // 启用画笔
