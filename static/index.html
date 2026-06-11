@@ -890,16 +890,15 @@ function gradeWorksheet(gkey){
                 });
                 return;
             }
-            // 模糊匹配函数：先精确→再 alts→再错别字
+            // 模糊匹配函数：只精确匹配和alts同义词，不启用错别字（防止"地"被判成"高原"）
             function fuzzyMatch(v, candidates){
                 var exact = candidates.indexOf(v);
                 if(exact >= 0) return candidates[exact];
                 for(var ci=0; ci<candidates.length; ci++){
-                    if(checkAnswer(v, candidates[ci], q.acceptAlt, q.alts, 0)) return candidates[ci];
+                    if(checkAnswer(v, candidates[ci], q.acceptAlt, q.alts, ci)) return candidates[ci];
                 }
-                for(var ci=0; ci<candidates.length; ci++){
-                    if(isLikelyTypo(v, candidates[ci])) return candidates[ci];
-                }
+                // ★ 严格模式：地形组不写错别字容错，一个字就一个字
+                // 不启用 isLikelyTypo，防止"地"匹配"高原"
                 return null;
             }
             // 逐值匹配（已匹配的答案不可重复占用）
