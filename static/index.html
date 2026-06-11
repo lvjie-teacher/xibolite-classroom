@@ -1186,6 +1186,14 @@ function enterApp(){
     if(currentGroup!==prevGroup||currentGroupNum!==prevNum){
         uploadedImages=[];imageUrls=[];
     }
+    // ★ 清除所有旧的判题标记（✓✗图标、select颜色等）
+    document.querySelectorAll('.ws-grade-icon').forEach(el=>el.remove());
+    document.querySelectorAll('.ws-correct,.ws-wrong').forEach(el=>{
+        el.className=el.className.replace(/\bws-(correct|wrong)\b/g,'');
+    });
+    document.querySelectorAll('.ws-select').forEach(el=>{
+        el.style.borderColor='';el.style.backgroundColor='';el.style.color='';
+    });
     renderMainApp();
     // ★ 加载草稿（会恢复之前填的内容和图片）
     restoreDraft();
