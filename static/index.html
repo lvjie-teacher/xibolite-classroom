@@ -1678,6 +1678,7 @@ function enterPresentation(){
     sel.innerHTML=presGroups.map((g,i)=>`<option value="${i}"${i===presGroupIdx?' selected':''}>${g.group_icon||''} ${g.group_name} · 第${g.group_num}组</option>`).join('');
     renderPresSlide();
     bindPresWheel();
+    bindPresDragPan();
     try{document.documentElement.requestFullscreen?.();}catch(e){}
 }
 
@@ -2030,6 +2031,34 @@ function bindPresWheel(){
     window._presWheelBound=true;
     const wrap=document.getElementById('presImgWrap');
     if(wrap)wrap.addEventListener('wheel',presWheelZoom,{passive:false});
+}
+// ★ 图片拖拽平移（放大后可拖动查看）
+let presDragState=null;
+function bindPresDragPan(){
+    const wrap=document.getElementById('presImgWrap');
+    if(!wrap||wrap._dragBound)return;
+    wrap._dragBound=true;
+    wrap.addEventListener('mousedown',function(e){
+        // 画笔模式下不触发拖拽
+        if(presDrawing||e.button!==0||e.target.tagName==='CANVAS')return;
+        presDragState={startX:e.clientX,startY:e.clientY,scrollLeft:wrap.scrollLeft,scrollTop:wrap.scrollTop};
+        wrap.classList.add('dragging');
+        e.preventDefault();
+    });
+    document.addEventListener('mousemove',function(e){
+        if(!presDragState)return;
+        const dx=e.clientX-presDragState.startX;
+        const dy=e.clientY-presDragState.startY;
+        wrap.scrollLeft=presDragState.scrollLeft-dx;
+        wrap.scrollTop=presDragState.scrollTop-dy;
+    });
+    document.addEventListener('mouseup',function(){
+        if(presDragState){
+            presDragState=null;
+            const w=document.getElementById('presImgWrap');
+            if(w)w.classList.remove('dragging');
+        }
+    });
 }
 function presGroupPrev(){if(presGroupIdx>0){presGroupIdx--;presImgIdx=0;presZoom=1;renderPresSlide();}}
 function presGroupNext(){if(presGroupIdx<presGroups.length-1){presGroupIdx++;presImgIdx=0;presZoom=1;renderPresSlide();}}
