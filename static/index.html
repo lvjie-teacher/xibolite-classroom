@@ -1409,6 +1409,16 @@ async function clearGroupData(){
     delete sessionResults[currentGroup+'_'+currentGroupNum];
     // 清空草稿
     localStorage.removeItem('draft_'+currentGroup+'_'+currentGroupNum);
+    // ★ 清空当前页面所有输入
+    document.querySelectorAll('.ws-blank').forEach(el => el.value = '');
+    document.querySelectorAll('.ws-select').forEach(el => { el.value = ''; el.style.borderColor=''; el.style.backgroundColor=''; el.style.color=''; });
+    document.querySelectorAll('.t2-textarea').forEach(el => el.value = '');
+    document.querySelectorAll('input[name="t2Harder"]').forEach(el => el.checked = false);
+    document.querySelectorAll('.ws-grade-icon').forEach(el => el.remove());
+    document.querySelectorAll('.ws-correct,.ws-wrong').forEach(el => {
+        el.className = el.className.replace(/\bws-(correct|wrong)\b/g,'');
+    });
+    document.querySelectorAll('.ws-error-hint').forEach(el => el.remove());
     // 2. 通知服务器清空本组
     if(serverMode){
         try{
@@ -1435,7 +1445,17 @@ async function clearAllData(){
     for(const k of Object.keys(localStorage)){
         if(k.startsWith('draft_'))localStorage.removeItem(k);
     }
-    // 2. 通知服务器清空全部
+    // 2. ★ 清空当前页面所有输入
+    document.querySelectorAll('.ws-blank').forEach(el => el.value = '');
+    document.querySelectorAll('.ws-select').forEach(el => { el.value = ''; el.style.borderColor=''; el.style.backgroundColor=''; el.style.color=''; });
+    document.querySelectorAll('.t2-textarea').forEach(el => el.value = '');
+    document.querySelectorAll('input[name="t2Harder"]').forEach(el => el.checked = false);
+    document.querySelectorAll('.ws-grade-icon').forEach(el => el.remove());
+    document.querySelectorAll('.ws-correct,.ws-wrong').forEach(el => {
+        el.className = el.className.replace(/\bws-(correct|wrong)\b/g,'');
+    });
+    document.querySelectorAll('.ws-error-hint').forEach(el => el.remove());
+    // 3. 通知服务器清空全部
     if(serverMode){
         try{
             const r=await fetch('/api/clear',{method:'POST'});
