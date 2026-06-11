@@ -2151,13 +2151,16 @@ function restoreWorksheetData(wsData){
         const vals = wsData[qKey];
         if(!Array.isArray(vals)) return;
         const qi = parseInt(qKey.replace('q',''));
+        var blankIdx = 0, selectIdx = 0;
         vals.forEach((v, idx) => {
             if(v.type === 'blank'){
-                const input = document.querySelector(`input[data-gkey="${currentGroup}"][data-qi="${qi}"][data-bi="${idx}"]`);
+                const input = document.querySelector(`input[data-gkey="${currentGroup}"][data-qi="${qi}"][data-bi="${blankIdx}"]`);
                 if(input && v.value) input.value = v.value;
+                blankIdx++;
             } else if(v.type === 'select'){
-                const sel = document.querySelector(`select[data-gkey="${currentGroup}"][data-qi="${qi}"][data-si="${idx}"]`);
+                const sel = document.querySelector(`select[data-gkey="${currentGroup}"][data-qi="${qi}"][data-si="${selectIdx}"]`);
                 if(sel && v.value) sel.value = v.value;
+                selectIdx++;
             }
         });
     });
