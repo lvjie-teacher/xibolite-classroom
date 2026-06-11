@@ -949,6 +949,16 @@ function gradeWorksheet(gkey){
                 sel.style.borderColor = isRight ? '#4caf50' : '#f44336';
                 sel.style.backgroundColor = isRight ? '#e8f5e9' : '#ffebee';
                 sel.style.color = isRight ? '#2e7d32' : '#c62828';
+                // 添加/更新 ✓✗ 图标
+                var icon = sel.nextElementSibling;
+                if(icon && icon.classList.contains('ws-grade-icon')) icon.remove();
+                icon = document.createElement('span');
+                icon.className = 'ws-grade-icon';
+                icon.textContent = isRight ? '✓' : '✗';
+                icon.style.color = isRight ? '#4caf50' : '#f44336';
+                icon.style.marginLeft = '4px';
+                icon.style.fontSize = '14px';
+                sel.parentNode.insertBefore(icon, sel.nextSibling);
                 if(isRight) correct++;
             });
             return; // 跳过普通判卷（blanks已经判完，selects已补充判完）
@@ -1106,7 +1116,7 @@ function collectWorksheetData(gkey){
 }
 
 // ============ 版本刷新（自动清除浏览器缓存）============
-(function(){const v='240610B';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
+(function(){const v='240611I';if(localStorage.getItem('_app_ver')!==v){localStorage.setItem('_app_ver',v);location.reload(true);}})();
 
 // ============ 初始化 ============
 window.addEventListener('DOMContentLoaded',()=>{
