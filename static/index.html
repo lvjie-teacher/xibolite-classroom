@@ -588,7 +588,12 @@ const WORKSHEET_DATA = {
             },
             {
                 text: '以{blank}气候为主，冬季{blank}漫长。',
-                blanks: ['温带大陆性','寒冷']
+                blanks: ['温带大陆性','寒冷'],
+                acceptAlt: true,
+                alts: [
+                    [],
+                    ['寒冷','严寒','冷','寒','很冷','极寒','酷寒','气温低','低温','较冷','温度低']
+                ]
             },
             {
                 text: '寒带气候主要分布在俄罗斯{select:北|南|东|西}部地区；温带季风气候分布在{select:东|西|南|北}部{select:太平洋|大西洋|北冰洋}沿岸地区。',
@@ -609,13 +614,17 @@ const WORKSHEET_DATA = {
                 selects: [['多','少']], answers: ['多']
             },
             {
-                text: '俄罗斯西伯利亚地区的三大河流，自西向东分别是：{blank}河、叶尼塞河、{blank}河，流向自{select:南|西}向{select:北|东}流。',
+                text: '俄罗斯西伯利亚地区的三大河流，自西向东分别是：{blank}河、叶尼塞河、{blank}河，流向自{select:东|西|南|北}向{select:东|西|南|北}流。',
                 blanks: ['鄂毕','勒拿'],
-                selects: [['南','西'],['北','东']], answers: ['南','北']
+                selects: [['东','西','南','北'],['东','西','南','北']], answers: ['南','北'],
+                acceptAlt: true,
+                alts: [['鄂毕','鄂毕河'],['勒拿','勒拿河']]
             },
             {
                 text: '俄罗斯欧洲部分最长的河流是{blank}河，被称为俄罗斯的"母亲河"。',
-                blanks: ['伏尔加']
+                blanks: ['伏尔加'],
+                acceptAlt: true,
+                alts: [['伏尔加','伏尔加河','Volga']]
             },
             {
                 text: '大部分河流结冰期{select:很长|很短|无}。',
