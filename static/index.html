@@ -938,7 +938,20 @@ function gradeWorksheet(gkey){
             });
             if(hasShuffleTypo) showWsHint(gkey, qi, '书写错误');
             else if(q.errorHint) showWsHint(gkey, qi, q.errorHint);
-            return; // 跳过普通判卷
+            // ★ 同时判读 selects（如果有）
+            (q.answers || []).forEach(function(answer, si){
+                total++;
+                var sel = document.querySelector(`select[data-gkey="${gkey}"][data-qi="${qi}"][data-si="${si}"]`);
+                if(!sel) return;
+                var val = sel.value;
+                if(!val) return;
+                var isRight = val === answer;
+                sel.style.borderColor = isRight ? '#4caf50' : '#f44336';
+                sel.style.backgroundColor = isRight ? '#e8f5e9' : '#ffebee';
+                sel.style.color = isRight ? '#2e7d32' : '#c62828';
+                if(isRight) correct++;
+            });
+            return; // 跳过普通判卷（blanks已经判完，selects已补充判完）
         }
 
         // ===== 处理普通 blanks =====
